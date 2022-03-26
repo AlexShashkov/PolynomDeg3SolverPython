@@ -45,7 +45,7 @@ class Array(object):
         if self.outputf is not None:
             return self.outputf(self)
         else:
-            return f"Array {self.shape}{str(self.values.copy())}"
+            return f"Vieta array:{self.shape}:\n{str(self.values.copy())}"
     def __getitem__(self, key):
         return self.values[key]
 
@@ -176,19 +176,22 @@ class Solver(object):
     def __call__(self) -> Array:
         def _checkA(row):
             newCol = row.copy()
-            print(row)
+            #print(row)
             if row[3] != 1:
                 newCol /- row[3]
-            print(newCol)
+            #print(newCol)
             return newCol
 
         def _Usual(Q, R, S, inp):
             phi = np.arccos(R/np.sqrt(Q**3))/3
+            #print("Usual method")
+            #print(f"Phi: {phi} ")
             x1 = -2*np.sqrt(Q)*np.cos(phi)-inp[2]/3
             x2 = 2*np.sqrt(Q)*np.cos(phi+2*np.pi/3)-inp[2]/3
             x3 = -2*np.sqrt(Q)*np.cos(phi-2*np.pi/3)-inp[2]/3
             return (x1, x2, x3) 
         def _Complex(Q, R, S, inp):
+            #print("Complex method")
             phi = 0
             T = 0
             x2, x3 = 0, 0
@@ -202,26 +205,32 @@ class Solver(object):
                 T = np.sign(R)*np.sqrt(np.abs(Q))*methods.sh(phi)
                 x2 = T - inp[2]/3+1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.ch(phi)
                 x3 = T - inp[2]/3-1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.ch(phi)
+            #print(f"Phi: {phi}, T: {T}")
             x1 = -2*T-inp[2]/3
             return (x1, x2, x3)
         
         def _Degenerate(Q, R, S, inp):
-            x1 = -ld(2)*cbrt(R)-inp[2]/ld(3)
-            x2 = cbrt(R)-inp[2]/ld(3)
+            #print("Degenerate method")
+            x1 = -2*np.cbrt(R.real)-inp[2]/3 
+            x2 = np.cbrt(R.real)-inp[2]/3
             return (x1, x2, np.NaN)
         
-        def _solve(inp):
+        def _solve(inp): 
+            #print(f"Input: {inp}")
             Q = (inp[2]**lc(2) - 3*inp[1])/9
             R = (2*inp[2]**3-9*inp[1]*inp[2]+27*inp[0])/54
             S = Q**3 - R**2
+            #print(f"Q: {Q}, R: {R}, S: {S}")
             x1, x2, x3 = 0, 0, 0
             if np.isclose(0, S, lc(os.environ.get('tolerance', '1e-08'))):
-                _x1, x2, x3 = Degenerate(Q, R, S, inp)
+                x1, x2, x3 = _Degenerate(Q, R, S, inp)
             elif S > 0:
                 x1, x2, x3 = _Usual(Q, R, S, inp)
             else:
-                x1, x2, x3 = _Usual(Q, R, S, inp)
-            return np.longcomplex([x1, x2, x3]).reshape((3, ))
+                x1, x2, x3 = _Complex(Q, R, S, inp)
+            #print(f"Preresult: {x1}, {x2}, {x3} ")
+            arr = [x1, x2, x3]
+            return np.longcomplex(arr).reshape((3, ))
 
         newArray = np.apply_along_axis(_checkA, 1, self.array.values)
         newArray = np.apply_along_axis(_solve, 1, newArray)
