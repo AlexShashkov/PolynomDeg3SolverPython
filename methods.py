@@ -1,5 +1,5 @@
 from numpy import longdouble as ld
-
+import numpy as np
 def arsh(x):
     return np.log(x + np.sqrt(x**ld(2)+ld(1)))
 
