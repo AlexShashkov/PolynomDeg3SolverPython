@@ -1,6 +1,8 @@
 from functools import singledispatch, update_wrapper
 import methods
 import numpy as np
+from numpy import longcomplex as lc
+import os
 
 def methdispatch(func):
     dispatcher = singledispatch(func)
@@ -14,19 +16,36 @@ class Array(object):
     # INIT
     @methdispatch
     def __init__(self, array):
+        self.outputf = None
         self.values = array()
+        if self.values.ndim == 1:
+            self.values = self.values.reshape((1, self.values.shape[0]))
+        self.shape = self.values.shape
     @__init__.register(list)
     def _(self, array):
+        self.outputf = None
         self.values = np.longcomplex(array)
+        if self.values.ndim == 1:
+           self.values = self.values.reshape((1, self.values.shape[0]))
+        self.shape = self.values.shape
     @__init__.register(np.ndarray)
     def _(self, array):
+        self.outputf = None
         self.values = array.copy()
+        if self.values.ndim == 1:
+            self.values = self.values.reshape((1, self.values.shape[0]))
+        self.shape = self.values.shape
 
     # MISC
+    def setOutputFunction(self, func):
+        self.outputf = func
     def __call__(self) -> np.ndarray:
         return self.values.copy()
     def __str__(self):
-        return str(self.values.copy())
+        if self.outputf is not None:
+            return self.outputf(self)
+        else:
+            return f"Array {self.shape}{str(self.values.copy())}"
     def __getitem__(self, key):
         return self.values[key]
 
@@ -105,6 +124,14 @@ class Array(object):
     def _(self, other:float):
         other = np.longcomplex(other)
         return self.__mul__(other)
+    @__add__.register
+    def _(self, other:int):
+        other = np.longcomplex(other)
+        return self.__mul__(other)
+    @__add__.register
+    def _(self, other:complex):
+        other = np.longcomplex(other)
+        return self.__mul__(other)
 
     # *=
     # Arrays
@@ -129,16 +156,73 @@ class Array(object):
     def _(self, other:float):
         self.values *= np.longcomplex(other)
         return self
+    @__imul__.register
+    def _(self, other:int):
+        self.values *= np.longcomplex(other)
+        return self
+    @__imul__.register
+    def _(self, other:complex):
+        self.values *= np.longcomplex(other)
+        return self
 
 class Solver(object):
-    def __init__(array:"Array") -> "Array":
+    def __init__(self, array:"Array") -> "Array":
+        self.round_dec = bool(os.environ.get('roundto', 1))
         self.array = Array(array)
-        if self.array[3]!=lc(1):
-	        item = self.array[3].copy()
-	        self.array = lc(list(map(lambda x: x/item, self.array())))
-        self.array = Array(array)
+
+        if self.array.shape[1] != 4:
+            raise Exception("Wrong dimension. Vieta method works only with shapes of (1, 4)!")
     
-    def solve(self):
-        Q = (inp[2]**lc(2) - 3*inp[1])/9
-        R = (2*inp[2]**3-9*inp[1]*inp[2]+27*inp[0])/54
-        S = Q**3 - R**2
+    def __call__(self) -> Array:
+        def _checkA(row):
+            newCol = row.copy()
+            print(row)
+            if row[3] != 1:
+                newCol /- row[3]
+            print(newCol)
+            return newCol
+
+        def _Usual(Q, R, S, inp):
+            phi = np.arccos(R/np.sqrt(Q**3))/3
+            x1 = -2*np.sqrt(Q)*np.cos(phi)-inp[2]/3
+            x2 = 2*np.sqrt(Q)*np.cos(phi+2*np.pi/3)-inp[2]/3
+            x3 = -2*np.sqrt(Q)*np.cos(phi-2*np.pi/3)-inp[2]/3
+            return (x1, x2, x3) 
+        def _Complex(Q, R, S, inp):
+            phi = 0
+            T = 0
+            x2, x3 = 0, 0
+            if Q>0:
+                phi = methods.arch(np.abs(R)/np.sqrt(np.abs(Q**3)))/3
+                T = np.sign(R)*np.sqrt(np.abs(Q))*methods.ch(phi)
+                x2 = T - inp[2]/3+1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.sh(phi)
+                x3 = T - inp[2]/3-1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.sh(phi)
+            else:
+                phi = methods.arsh(np.abs(R)/np.sqrt(np.abs(Q**3)))/3
+                T = np.sign(R)*np.sqrt(np.abs(Q))*methods.sh(phi)
+                x2 = T - inp[2]/3+1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.ch(phi)
+                x3 = T - inp[2]/3-1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.ch(phi)
+            x1 = -2*T-inp[2]/3
+            return (x1, x2, x3)
+        
+        def _Degenerate(Q, R, S, inp):
+            x1 = -ld(2)*cbrt(R)-inp[2]/ld(3)
+            x2 = cbrt(R)-inp[2]/ld(3)
+            return (x1, x2, np.NaN)
+        
+        def _solve(inp):
+            Q = (inp[2]**lc(2) - 3*inp[1])/9
+            R = (2*inp[2]**3-9*inp[1]*inp[2]+27*inp[0])/54
+            S = Q**3 - R**2
+            x1, x2, x3 = 0, 0, 0
+            if np.isclose(0, S, lc(os.environ.get('tolerance', '1e-08'))):
+                _x1, x2, x3 = Degenerate(Q, R, S, inp)
+            elif S > 0:
+                x1, x2, x3 = _Usual(Q, R, S, inp)
+            else:
+                x1, x2, x3 = _Usual(Q, R, S, inp)
+            return np.longcomplex([x1, x2, x3]).reshape((3, ))
+
+        newArray = np.apply_along_axis(_checkA, 1, self.array.values)
+        newArray = np.apply_along_axis(_solve, 1, newArray)
+        return Array(newArray)
