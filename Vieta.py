@@ -178,7 +178,7 @@ class Solver(object):
             newCol = row.copy()
             #print(row)
             if row[3] != 1:
-                newCol /- row[3]
+                newCol /= row[3]
             #print(newCol)
             return newCol
 
