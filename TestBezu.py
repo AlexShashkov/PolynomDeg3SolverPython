@@ -8,7 +8,7 @@ class TestBezu(unittest.TestCase):
     def setUp(self):
         self.bezu = Bezu(0,0,0,0,0)
     def testData(self):
-        self.assertEqual(self.bezu.result(), [1])#Если сумма всех коэффициентов многочлена равна нулю, то число 1 является корнем многочлена.
+        self.assertEqual(self.bezu.result(), "Бесконечно много решений")
     def testData2(self):
         self.bezu = Bezu(1,2,3,4,5)
         self.assertEqual(self.bezu.result(), "Нельзя воспользоваться методом Безу")
@@ -27,6 +27,6 @@ class TestBezu(unittest.TestCase):
     def testData6(self):
         self.bezu = Bezu(-0.249999999999999945, -0.249999999999999946, -0.249999999999999947, -0.249999999999999948, 0)
         self.assertEqual(self.bezu.result(), [-1, 1j, -1j])
-        
+
 if __name__ == "__main__":
     unittest.main()
