@@ -27,6 +27,9 @@ class TestBezu(unittest.TestCase):
     def testData6(self):
         self.bezu = Bezu(-0.249999999999999945, -0.249999999999999946, -0.249999999999999947, -0.249999999999999948, 0)
         self.assertEqual(self.bezu.result(), [-1, 1j, -1j])
+    def testData7(self):
+        self.bezu = Bezu(1, -2, 3, -2, 0)
+        self.assertEqual(self.bezu.result(), [1, (0.5+1.3228756555322951j), (0.5-1.3228756555322951j)])#Если сумма всех коэффициентов многочлена равна нулю, то число 1 является корнем многочлена.
 
 if __name__ == "__main__":
     unittest.main()
