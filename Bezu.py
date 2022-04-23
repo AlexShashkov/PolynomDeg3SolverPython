@@ -1,9 +1,6 @@
 from functools import singledispatch, update_wrapper
-from math import exp
 
 import numpy as np
-
-NUN = exp(-20)
 
 
 def methdispatch(func):
@@ -23,7 +20,12 @@ class Bezu:
 
     @methdispatch
     def __init__(self, a_0, a_1, a_2, a_3, a_4):
-        self.coefficient = np.array([a_0, a_1, a_2, a_3, a_4])
+        if a_0 == 0:
+            self.coefficient = np.array([a_1, a_2, a_3, a_4])
+            if a_1 == 0:
+                self.coefficient = np.array([a_2, a_3, a_4])
+        else:
+            self.coefficient = np.array([a_0, a_1, a_2, a_3, a_4])
         self.len_polynomial = self.coefficient.shape[0]
         self.roots = []
 
@@ -49,7 +51,11 @@ class Bezu:
 
     # данная функция возвращает один корень многочлена по результатам выполнения первых 4x пунктов(readme.md).
     def __root_polynomial(self):
-        if np.sum(self.coefficient) == 0:
+        if np.count_nonzero(self.coefficient) == 1 and self.len_polynomial > 1:
+            return 0
+        elif np.count_nonzero(self.coefficient) == 0:
+            return '%%'
+        elif np.sum(self.coefficient) == 0:
             return 1
         elif np.sum([self.coefficient[i] for i in range(self.len_polynomial) if i % 2 == 0]) == np.sum(
                 [self.coefficient[i] for i in range(self.len_polynomial) if i % 2 != 0]):
@@ -63,7 +69,7 @@ class Bezu:
                 if self.len_polynomial == 5:
                     return None
                 elif self.len_polynomial == 3 or (self.coefficient[0] == 0 and self.len_polynomial == 4):
-                    return 0
+                    return ''
         # return None
 
     # Функция для нахождения делителей n
@@ -93,21 +99,34 @@ class Bezu:
         return result + self.coefficient[self.len_polynomial - 1]
 
     def result(self):
-        per = self.__root_polynomial()
-        # print(per)
-
-        if per:
-            self.roots.append(per)
-            Bezu(np.polynomial.polynomial.polydiv(self.coefficient, (1, -per))[0], self.roots).result()
-        elif per == 0:
-            r = np.roots(self.coefficient)
-            self.roots.append(r[0])
-            self.roots.append(r[1])
-            print(self.roots)
-            # return self.roots
-        else:
-            if len(self.roots) > 0:
+        while True:
+            per = self.__root_polynomial()
+            if per == '%%':
+                print('Бесконечно много решений')
+                return 'Бесконечно много решений'
+            elif per:
+                self.roots.append(per)
+                self.coefficient = np.polynomial.polynomial.polydiv(self.coefficient, (1, -per))[0]
+                self.len_polynomial = self.coefficient.shape[0]
+                if self.len_polynomial == 1:
+                    print(self.roots)
+                    return self.roots
+                continue
+            elif per == 0:
+                self.roots.append(per)
                 print(self.roots)
-                # return self.roots
+                return self.roots
+            elif per == '':
+                if np.count_nonzero(self.coefficient) > 1:
+                    r = np.roots(self.coefficient)
+                    self.roots.append(r[0])
+                    self.roots.append(r[1])
+                    print(self.roots)
+                    return self.roots
             else:
-                print('Нельзя воспользоваться методом Безу')
+                if len(self.roots) > 0:
+                    print(self.roots)
+                    return self.roots
+                else:
+                    print('Нельзя воспользоваться методом Безу')
+                    return 'Нельзя воспользоваться методом Безу'
