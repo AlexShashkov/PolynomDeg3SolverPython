@@ -6,6 +6,7 @@ import numpy as np
 
 def arg(x, y):
     # Аргумент комплексного числа
+    print(x, y)
     if x > 0 and y >= 0:
         return np.arctan(y/x)
     elif x < 0 and y >= 0:
@@ -18,6 +19,8 @@ def arg(x, y):
         return np.pi/2
     elif x == 0 and y < 0:
         return (3*np.pi)/2
+    elif x == 0 and y == 0:
+        return 0
     else:
         raise ValueError("Invalid type of complex z")
 
@@ -92,8 +95,15 @@ else:
     A2 += 23*b()*c.deg4 - 99*b()*c()*d.deg2 - 21*c.deg3*d() + 27*d.deg3 - sqrt1*sqrt2 * (8*b.deg2*c.deg2 - 10*b()*c()*d() +
         c.deg3 + 3*d.deg2)
 
-    R1 = npow(sqrt1 * sqrt2 / 9 + r, 1/3)
+    R1 = None
     R2 = npow(sqrt1 * sqrt2 / 9 - r, 1/3)
+    if o != 0:
+        R1 = npow(sqrt1 * sqrt2 / 9 + r, 1/3)
+    else:
+        R1 = -R2
+
+    # R1 = npow(sqrt1 * sqrt2 / 9 + r, 1/3)
+    # R2 = npow(sqrt1 * sqrt2 / 9 - r, 1/3)
     print("R1, R2")
     print(R1, R2)
 
