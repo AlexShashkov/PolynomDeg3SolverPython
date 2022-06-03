@@ -1,4 +1,5 @@
 from functools import singledispatch, update_wrapper
+from types import SimpleNamespace
 import numpy as np
 from numpy import longcomplex as lc
 
@@ -9,6 +10,19 @@ def methdispatch(func):
     wrapper.register = dispatcher.register
     update_wrapper(wrapper, func)
     return wrapper
+
+
+class Struct(SimpleNamespace):
+    # Для хранения степеней числа
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    def __call__(self):
+        return self.init
+    def expand(self, **kwargs):
+        for key, value in kwargs.items():
+            #print(key, value)
+            #vars()[key] = value
+            setattr(self, key, value)
 
 class Array(object):
     # INIT
