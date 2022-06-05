@@ -7,6 +7,9 @@ from numpy import longcomplex as lc, power as npow
 import os
 
 class Solver(object):
+    def __init__(self):
+        self.onethree = 1/3
+        self.twothree = 2/3
     def __call__(self, array:"Array") -> "Array":
         """Функтор для решения уравнений методом Baydoun.
         @type array: Array
@@ -78,23 +81,24 @@ class Solver(object):
 
         sqrt1 = None
         if o > 0:
-            sqrt1 = npow(o + 0j, 1/2)
+            sqrt1 = npow(o + 0j, 0.5)
         else:
-            sqrt1 = lc(0+1j)*npow(abs(o)+0j, 1/2)
+            sqrt1 = lc(0+1j)*npow(abs(o)+0j, 0.5)
 
-        sqrt2 = lc(0+1j)*npow(lc(3), 1/2)
-        sqrt3 = npow(lc(4), 1/3)
+        sqrt2 = lc(0+1j)*npow(lc(3), 0.5)
+        sqrt3 = npow(lc(4), self.onethree)
 
         bl = (d()-b()*c()) * sqrt1 * (4*b.deg2*c.deg2 - 4*b()*c()*d() + c.deg3 + d.deg2) + (sqrt2/9)*t
-        bl1 = npow(bl, 1/3)
-        bl2 = npow(bl, 2/3)
+        bl1 = npow(bl, self.onethree)
+        bl2 = npow(bl, self.twothree)
         A1 = (-2*sqrt2/3)*(4*b.deg3*c() - 2*d()*b.deg2 - 13*b()*c.deg2 + 15*d()*c()) + 2*c()*sqrt1
         A2 = 8*b.deg5*c.deg2 - 8*b.deg4*c()*d() - 40*b.deg3*c.deg3 + 2*b.deg3*d.deg2 + 116*b.deg2*c.deg2*d()
         A2 += 23*b()*c.deg4 - 99*b()*c()*d.deg2 - 21*c.deg3*d() + 27*d.deg3 - sqrt1*sqrt2 * (8*b.deg2*c.deg2 - 10*b()*c()*d() +
             c.deg3 + 3*d.deg2)
 
-        R1 = npow(sqrt1 * sqrt2 / 9 + r, 1/3)
-        R2 = npow(sqrt1 * sqrt2 / 9 - r, 1/3)
+        Rbase = sqrt1 * sqrt2 / 9
+        R1 = npow(Rbase + r, self.onethree)
+        R2 = npow(Rbase - r, self.onethree)
         if o == 0:
             if r > 0:
                 R2 = -R1
@@ -103,8 +107,10 @@ class Solver(object):
         # print("R1, R2")
         # print(R1, R2)
 
-        M = [-1, 0.5 - sqrt2/2, 0.5 + sqrt2/2]
-        M2 = [1, -0.5-sqrt2/2, -0.5 + sqrt2/2]
+        sqrt2ftwo = sqrt2/2
+
+        M = [-1, 0.5 - sqrt2ftwo, 0.5 + sqrt2ftwo]
+        M2 = [1, -0.5 - sqrt2ftwo, -0.5 + sqrt2ftwo]
 
         # print("args")
         arg1_1 = A1*bl1
@@ -120,8 +126,10 @@ class Solver(object):
         phi1 = arg(arg1_1.real, arg1_1.imag) - arg(arg1_2.real, arg1_2.imag)
         phi2 = arg(arg2_1.real, arg2_1.imag) - arg(arg2_2.real, arg2_2.imag)
 
-        a1 = (sqrt3/2)*(np.cos(phi1)+1j*np.sin(phi1))
-        a2 = (sqrt3/2)*(np.cos(phi2)+1j*np.sin(phi2))
+        sqrt3ftwo = sqrt3/2
+
+        a1 = (sqrt3ftwo)*(np.cos(phi1)+1j*np.sin(phi1))
+        a2 = (sqrt3ftwo)*(np.cos(phi2)+1j*np.sin(phi2))
 
         # print("alphas: ", a1, a2)
         # print("M2:", M[2], M2[2])
