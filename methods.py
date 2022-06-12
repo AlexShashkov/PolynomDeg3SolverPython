@@ -47,3 +47,24 @@ def arg(x, y):
         return 0
     else:
         raise ValueError("Invalid type of complex z")
+
+def fastpow(x, deg):
+    """ Быстрое возведение в степень для натуральных чисел
+    https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+    @type x: int
+    @param x: Число, которое необходимо возвести в степень.
+    @type def: int
+    @param deg: Непосредственно необходимая степень числа.
+    @rtype: int
+    @returns: Число x в степени deg
+    """
+    if deg < 0:
+        return 1 / power(x, -deg)
+    ans = 1
+    while deg:
+        if deg & 1:
+            ans *= x
+        deg >>= 1
+        x *= x
+    return ans
+

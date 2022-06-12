@@ -1,11 +1,15 @@
 import methods
+from methods import fastpow as fpow
 from functools import singledispatch, update_wrapper
 from MethodsArray import Array
 import numpy as np
 from numpy import longcomplex as lc
-import os
+from numpy import power as npow
 
 class Solver(object):
+    def __init__(self):
+        self.pidiv3 = np.pi/3
+        self.sqrt3 = np.sqrt(3)
     def __call__(self, array:"Array") -> "Array":
         """Функтор для решения уравнений методом Виета.
 
@@ -15,11 +19,10 @@ class Solver(object):
         @rtype: Array
         @returns: Объект типа Array с решениями уравнения.
         """
-        self.round_dec = bool(os.environ.get('roundto', 1))
         self.array = Array(array)
 
         if self.array.shape[1] != 4:
-            raise Exception("Wrong dimension. Vieta method works only with shapes of (1, 4)!")
+            raise Exception("Wrong dimension. Vieta method works only with shapes of (N, 4)!")
 
         # Построчно вычислим корни
         newArray = np.apply_along_axis(self._checkA, 1, self.array.values)
@@ -56,12 +59,16 @@ class Solver(object):
         @rtype: Array
         @returns: Объект типа Array с решениями уравнения.
         """
-        phi = np.arccos(R/np.sqrt(Q**3))/3
+        inp2three = inp[2]/3
+
+        phi = np.arccos(R/np.sqrt(Q[1]))/3
         #print("Usual method")
         #print(f"Phi: {phi} ")
-        x1 = -2*np.sqrt(Q)*np.cos(phi)-inp[2]/3
-        x2 = 2*np.sqrt(Q)*np.cos(phi+2*np.pi/3)-inp[2]/3
-        x3 = -2*np.sqrt(Q)*np.cos(phi-2*np.pi/3)-inp[2]/3
+
+        sqrtQ = 2*np.sqrt(Q[0])
+        x1 = -sqrtQ*np.cos(phi)-inp2three
+        x2 = sqrtQ*np.cos(phi+2*self.pidiv3)-inp2three
+        x3 = -sqrtQ*np.cos(phi-2*self.pidiv3)-inp2three
         return (x1, x2, x3)
 
     def _Complex(self, Q, R, S, inp):
@@ -80,21 +87,26 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print("Complex method")
+        inp2three = inp[2]/3
         phi = 0
         T = 0
         x2, x3 = 0, 0
-        if Q>0:
-            phi = methods.arch(np.abs(R)/np.sqrt(np.abs(Q**3)))/3
-            T = np.sign(R)*np.sqrt(np.abs(Q))*methods.ch(phi)
-            x2 = T - inp[2]/3+1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.sh(phi)
-            x3 = T - inp[2]/3-1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.sh(phi)
+        absQ3 = np.abs(Q[1])
+        sqrtabsQ = np.sqrt(np.abs(Q[0]))
+        if Q[0]>0:
+            phi = methods.arch(np.abs(R)/np.sqrt(absQ3))/3
+            T = np.sign(R)*sqrtabsQ*methods.ch(phi)
+            sqrtsh = self.sqrt3*sqrtabsQ*methods.sh(phi)
+            x2 = T - inp2three +1j*sqrtsh
+            x3 = T - inp2three -1j*sqrtsh
         else:
-            phi = methods.arsh(np.abs(R)/np.sqrt(np.abs(Q**3)))/3
-            T = np.sign(R)*np.sqrt(np.abs(Q))*methods.sh(phi)
-            x2 = T - inp[2]/3+1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.ch(phi)
-            x3 = T - inp[2]/3-1j*np.sqrt(3)*np.sqrt(np.abs(Q))*methods.ch(phi)
+            phi = methods.arsh(np.abs(R)/np.sqrt(np.abs(Q[1])))/3
+            T = np.sign(R)*sqrtabsQ*methods.sh(phi)
+            sqrtch = self.sqrt3*sqrtabsQ*methods.ch(phi)
+            x2 = T - inp2three+1j*sqrtch
+            x3 = T - inp2three-1j*sqrtch
         #print(f"Phi: {phi}, T: {T}")
-        x1 = -2*T-inp[2]/3
+        x1 = -2*T-inp2three
         return (x1, x2, x3)
 
     def _Degenerate(self, Q, R, S, inp):
@@ -113,8 +125,9 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print("Degenerate method")
-        x1 = -2*np.cbrt(R.real)-inp[2]/3
-        x2 = np.cbrt(R.real)-inp[2]/3
+        inp2three = inp[2]/3
+        x1 = -2*np.cbrt(R.real)-inp2three
+        x2 = np.cbrt(R.real)-inp2three
         return (x1, x2, np.NaN)
 
     def _solve(self, inp):
@@ -130,17 +143,19 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print(f"Input: {inp}")
-        Q = (inp[2]**lc(2) - 3*inp[1])/9
-        R = (2*inp[2]**3-9*inp[1]*inp[2]+27*inp[0])/54
-        S = Q**3 - R**2
+        Q = (fpow(inp[2], 2) - 3*inp[1])/9
+        R = (2*fpow(inp[2], 3)-9*inp[1]*inp[2]+27*inp[0])/54
+        Q3 = npow(Q, 3)
+        R2 = npow(R, 2)
+        S = Q3 - R2
         #print(f"Q: {Q}, R: {R}, S: {S}")
         x1, x2, x3 = 0, 0, 0
-        if np.isclose(0, S, lc(os.environ.get('tolerance', '1e-08'))):
+        if S == 0:
             x1, x2, x3 = self._Degenerate(Q, R, S, inp)
         elif S > 0:
-            x1, x2, x3 = self._Usual(Q, R, S, inp)
+            x1, x2, x3 = self._Usual([Q, Q3], R, S, inp)
         else:
-            x1, x2, x3 = self._Complex(Q, R, S, inp)
+            x1, x2, x3 = self._Complex([Q, Q3], R, S, inp)
         #print(f"Preresult: {x1}, {x2}, {x3} ")
         arr = [x1, x2, x3]
         return np.longcomplex(arr).reshape((3, ))

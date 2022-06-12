@@ -1,10 +1,12 @@
 import methods
-from methods import arg
+from methods import arg, fastpow as fpow
 from functools import singledispatch, update_wrapper
 from MethodsArray import Array, Struct
 import numpy as np
 from numpy import longcomplex as lc, power as npow
 import os
+
+np.seterr(all='raise')
 
 class Solver(object):
     def __init__(self):
@@ -37,6 +39,7 @@ class Solver(object):
         newCol = row.copy()
         # print(row.shape)
         # print(row)
+        # В случае если число настолько маленькое и может вызвать переполнение, приведя к inf, то появится исключение из строки 9.
         if row[3] != lc(0):
             newCol /= row[3]
         a = newCol[3]
@@ -44,16 +47,17 @@ class Solver(object):
         c = newCol[1]
         d = newCol[0]
 
-        # Вычисляем степени
-
-        b = Struct(init=b, deg2=npow(b, 2), \
-                deg3=npow(b, 3), deg4=npow(b, 4), deg5=npow(b, 5), deg6=npow(b, 6), name="b")
-        c = Struct(init=c, deg2=npow(c, 2), \
-                deg3=npow(c, 3), deg4=npow(c, 4), name="c")
-        d = Struct(init=d, deg2=npow(d, 2), \
-                deg3=npow(d, 3), name="d")
-
-        return np.array([d, c, b, a])
+        # Вычислим степени с помощью fastpow 
+        bar = [b]
+        car = [c]
+        dar = [d]
+        degs = [i for i in range(2, 7)]
+        # print(degs[:4])
+        bar.extend(list(map(lambda x, deg: fpow(x, deg), [b for i in range(5)], degs)))
+        car.extend(list(map(lambda x, deg: fpow(x, deg), [c for i in range(5)], degs[:3])))
+        dar.extend(list(map(lambda x, deg: fpow(x, deg), [d for i in range(5)], degs[:2])))
+        # print("b", bar, "\nc", car, "\nd", dar, "\na", a)
+        return np.array([dar, car, bar, a], dtype=object)
 
     def _part2(self, row, o, r):
         """ Вычисление корней для случая, когда o != r.
@@ -73,11 +77,10 @@ class Solver(object):
         d = row[0]
         # print("o:", o)
         # print("r:", r)
-        t = 2*c.deg3 * (8*b.deg6 + 132*b.deg3*d() +
-            36*d.deg2 + c.deg3 + 33*b.deg2 *
-            c.deg2 - 66*b()*c()*d()) + 12*b.deg4*c() * (d.deg2 -
-            7*c.deg3) - b.deg2*c.deg2*d()*(24*b.deg3+291*d()) + d.deg3*(144*b()*c() - 2*b.deg3 - 27*d())
-        d0 = 4*b.deg4*c.deg2 - 4*b.deg3*c()*d() - 14*b.deg2*c.deg3 + b.deg2*d.deg2 + 28*b()*c.deg2*d() + c.deg4 - 12*c()*d.deg2
+        t = 2*c[2] * (8*b[5] + 132*b[2]*d[0] + 36*d[1] + c[2] + 33*b[1] * \
+            c[1] - 66*b[0]*c[0]*d[0]) + 12*b[3]*c[0] * (d[1] - 7*c[2]) - b[1] * \
+            c[1]*d[0]*(24*b[2]+291*d[0]) + d[2]*(144*b[0]*c[0] - 2*b[2] - 27*d[0])
+        d0 = 4*b[3]*c[1] - 4*b[2]*c[0]*d[0] - 14*b[1]*c[2] + b[1]*d[1] + 28*b[0]*c[1]*d[0] + c[3] - 12*c[0]*d[1]
 
         sqrt1 = None
         if o > 0:
@@ -85,18 +88,22 @@ class Solver(object):
         else:
             sqrt1 = lc(0+1j)*npow(abs(o)+0j, 0.5)
 
-        sqrt2 = lc(0+1j)*npow(lc(3), 0.5)
-        sqrt3 = npow(lc(4), self.onethree)
+        sqrt2 = lc(0+1j)*np.sqrt(3)
+        sqrt3 = lc(np.cbrt(4))
 
-        bl = (d()-b()*c()) * sqrt1 * (4*b.deg2*c.deg2 - 4*b()*c()*d() + c.deg3 + d.deg2) + (sqrt2/9)*t
+        bl = (d[0]-b[0]*c[0]) * sqrt1 * (4*b[1]*c[1] - 4*b[0]*c[0]*d[0] + c[2] + d[1]) + (sqrt2/9)*t
+        # print(bl)
+        # Numpy cubic root не работает с комплексными числами.
         bl1 = npow(bl, self.onethree)
         bl2 = npow(bl, self.twothree)
-        A1 = (-2*sqrt2/3)*(4*b.deg3*c() - 2*d()*b.deg2 - 13*b()*c.deg2 + 15*d()*c()) + 2*c()*sqrt1
-        A2 = 8*b.deg5*c.deg2 - 8*b.deg4*c()*d() - 40*b.deg3*c.deg3 + 2*b.deg3*d.deg2 + 116*b.deg2*c.deg2*d()
-        A2 += 23*b()*c.deg4 - 99*b()*c()*d.deg2 - 21*c.deg3*d() + 27*d.deg3 - sqrt1*sqrt2 * (8*b.deg2*c.deg2 - 10*b()*c()*d() +
-            c.deg3 + 3*d.deg2)
+        A1 = (-2*sqrt2/3)*(4*b[2]*c[0] - 2*d[0]*b[1] - 13*b[0]*c[1] + 15*d[0]*c[0]) + 2*c[0]*sqrt1
+        A2 = 8*b[4]*c[1] - 8*b[3]*c[0]*d[0] - 40*b[2]*c[2] + 2*b[2]*d[1] + 116*b[1]*c[1]*d[0]
+        A2 += 23*b[0]*c[3] - 99*b[0]*c[0]*d[1] - 21*c[2]*d[0] + 27*d[2] - sqrt1*sqrt2 * (8*b[1]*c[1] - 10*b[0]*c[0]*d[0] + c[2] + 3*d[1])
 
         Rbase = sqrt1 * sqrt2 / 9
+        #print(Rbase)
+        #print(r)
+        # Numpy cubic root не работает с комплексными числами.
         R1 = npow(Rbase + r, self.onethree)
         R2 = npow(Rbase - r, self.onethree)
         if o == 0:
@@ -133,9 +140,10 @@ class Solver(object):
 
         # print("alphas: ", a1, a2)
         # print("M2:", M[2], M2[2])
-        x1 = M[0]*a1*R1 + M2[0]*a2*R2 - b()/3
-        x2 = M[1]*a1*R1 + M2[1]*a2*R2 - b()/3
-        x3 = M[2]*a1*R1 + M2[2]*a2*R2 - b()/3
+        bthree = b[0]/3
+        x1 = M[0]*a1*R1 + M2[0]*a2*R2 - bthree
+        x2 = M[1]*a1*R1 + M2[1]*a2*R2 - bthree
+        x3 = M[2]*a1*R1 + M2[2]*a2*R2 - bthree
 
         if o>=0:
         # зануляем мнимую часть корней(тк все корни у нас 100% действительные)
@@ -165,12 +173,12 @@ class Solver(object):
         # print(b)
         # print(c)
         # print(d)
-        o = -4*b.deg3*d() + b.deg2*c.deg2 + 18*b()*c()*d() - 4*c.deg3 - 27*d.deg2
-        r = (2*b.deg3 - 9*b()*c() + 27*d())/27
+        o = -4*b[2]*d[0] + b[1]*c[1] + 18*b[0]*c[0]*d[0] - 4*c[2] - 27*d[1]
+        r = (2*b[2] - 9*b[0]*c[0] + 27*d[0])/27
         arr = None
         if o == 0 and r ==0:
             # Стандартные действительные корни
-            x1 = x2 = x3 = -b()/3
+            x1 = x2 = x3 = -b[0]/3
             arr = [x1, x2, x3]
         else:
             # Используем другую формулу из статьи
