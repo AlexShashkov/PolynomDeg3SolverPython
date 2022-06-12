@@ -6,6 +6,9 @@ import numpy as np
 from numpy import longcomplex as lc
 from numpy import power as npow
 
+np.seterr(all='raise')
+
+
 class Solver(object):
     def __init__(self):
         self.pidiv3 = np.pi/3
@@ -39,6 +42,7 @@ class Solver(object):
         """
         newCol = row.copy()
         #print(row)
+        # В случае если число слишком маленькое, то из строки 9 будет вызвано исключение
         if row[3] != 0:
             newCol /= row[3]
         #print(newCol)

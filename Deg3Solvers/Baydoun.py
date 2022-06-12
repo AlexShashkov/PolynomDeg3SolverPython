@@ -12,6 +12,8 @@ class Solver(object):
     def __init__(self):
         self.onethree = 1/3
         self.twothree = 2/3
+        self.sqrt3 = np.sqrt(3)
+        self.cbrt4 = np.cbrt(4)
     def __call__(self, array:"Array") -> "Array":
         """Функтор для решения уравнений методом Baydoun.
         @type array: Array
@@ -88,10 +90,12 @@ class Solver(object):
         else:
             sqrt1 = lc(0+1j)*npow(abs(o)+0j, 0.5)
 
-        sqrt2 = lc(0+1j)*np.sqrt(3)
-        sqrt3 = lc(np.cbrt(4))
+        sqrt2 = lc(0+1j)*self.sqrt3
+        sqrt3 = lc(self.cbrt4)
 
-        bl = (d[0]-b[0]*c[0]) * sqrt1 * (4*b[1]*c[1] - 4*b[0]*c[0]*d[0] + c[2] + d[1]) + (sqrt2/9)*t
+        sqrt2div9 = sqrt2/9
+
+        bl = (d[0]-b[0]*c[0]) * sqrt1 * (4*b[1]*c[1] - 4*b[0]*c[0]*d[0] + c[2] + d[1]) + (sqrt2div9)*t
         # print(bl)
         # Numpy cubic root не работает с комплексными числами.
         bl1 = npow(bl, self.onethree)
@@ -100,7 +104,7 @@ class Solver(object):
         A2 = 8*b[4]*c[1] - 8*b[3]*c[0]*d[0] - 40*b[2]*c[2] + 2*b[2]*d[1] + 116*b[1]*c[1]*d[0]
         A2 += 23*b[0]*c[3] - 99*b[0]*c[0]*d[1] - 21*c[2]*d[0] + 27*d[2] - sqrt1*sqrt2 * (8*b[1]*c[1] - 10*b[0]*c[0]*d[0] + c[2] + 3*d[1])
 
-        Rbase = sqrt1 * sqrt2 / 9
+        Rbase = sqrt1 * sqrt2div9
         #print(Rbase)
         #print(r)
         # Numpy cubic root не работает с комплексными числами.
@@ -141,9 +145,11 @@ class Solver(object):
         # print("alphas: ", a1, a2)
         # print("M2:", M[2], M2[2])
         bthree = b[0]/3
-        x1 = M[0]*a1*R1 + M2[0]*a2*R2 - bthree
-        x2 = M[1]*a1*R1 + M2[1]*a2*R2 - bthree
-        x3 = M[2]*a1*R1 + M2[2]*a2*R2 - bthree
+        a1R1 = a1*R1
+        a2R2 = a2*R2
+        x1 = M[0]*a1R1 + M2[0]*a2R2 - bthree
+        x2 = M[1]*a1R1 + M2[1]*a2R2 - bthree
+        x3 = M[2]*a1R1 + M2[2]*a2R2 - bthree
 
         if o>=0:
         # зануляем мнимую часть корней(тк все корни у нас 100% действительные)
@@ -184,4 +190,4 @@ class Solver(object):
             # Используем другую формулу из статьи
             arr = self._part2(row, o, r)
         return np.longcomplex(arr).reshape((3, ))
-
+Solver__doc__ = "Решает уравнения третьей степени методом Baydoun. На вход принимает многомерный массив, длина строки - 4. Возвращает матрицу с решениями для каждой строки."

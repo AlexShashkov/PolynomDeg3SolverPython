@@ -58,6 +58,8 @@ def fastpow(x, deg):
     @rtype: int
     @returns: Число x в степени deg
     """
+    if x == 1 or x == 0:
+        return x
     if deg < 0:
         return 1 / power(x, -deg)
     ans = 1
