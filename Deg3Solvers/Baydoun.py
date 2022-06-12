@@ -99,7 +99,7 @@ class Solver(object):
         # print(bl)
         # Numpy cubic root не работает с комплексными числами.
         bl1 = npow(bl, self.onethree)
-        bl2 = npow(bl, self.twothree)
+        bl2 = npow(bl1, 2)
         A1 = (-2*sqrt2/3)*(4*b[2]*c[0] - 2*d[0]*b[1] - 13*b[0]*c[1] + 15*d[0]*c[0]) + 2*c[0]*sqrt1
         A2 = 8*b[4]*c[1] - 8*b[3]*c[0]*d[0] - 40*b[2]*c[2] + 2*b[2]*d[1] + 116*b[1]*c[1]*d[0]
         A2 += 23*b[0]*c[3] - 99*b[0]*c[0]*d[1] - 21*c[2]*d[0] + 27*d[2] - sqrt1*sqrt2 * (8*b[1]*c[1] - 10*b[0]*c[0]*d[0] + c[2] + 3*d[1])
@@ -108,15 +108,20 @@ class Solver(object):
         #print(Rbase)
         #print(r)
         # Numpy cubic root не работает с комплексными числами.
-        R1 = npow(Rbase + r, self.onethree)
-        R2 = npow(Rbase - r, self.onethree)
+        R1 = None
+        R2 = None
         if o == 0:
             if r > 0:
+                R1 = npow(Rbase + r, self.onethree)
                 R2 = -R1
             else:
+                R2 = npow(Rbase - r, self.onethree)
                 R1 = -R2
-        # print("R1, R2")
-        # print(R1, R2)
+        else:
+            R1 = npow(Rbase + r, self.onethree)
+            R2 = npow(Rbase - r, self.onethree)
+
+        print(R1, R2)
 
         sqrt2ftwo = sqrt2/2
 
