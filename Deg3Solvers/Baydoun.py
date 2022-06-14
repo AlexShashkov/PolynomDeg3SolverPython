@@ -40,7 +40,7 @@ class Solver(object):
         """
         newCol = row.copy()
         # print(row.shape)
-        # print(row)
+        # vseprint(row)
         # В случае если число настолько маленькое и может вызвать переполнение, приведя к inf, то появится исключение из строки 9.
         if row[3] != lc(0):
             newCol /= row[3]
@@ -121,7 +121,7 @@ class Solver(object):
             R1 = npow(Rbase + r, self.onethree)
             R2 = npow(Rbase - r, self.onethree)
 
-        print(R1, R2)
+        #print(R1, R2)
 
         sqrt2ftwo = sqrt2/2
 

@@ -1,7 +1,55 @@
-from functools import singledispatch, update_wrapper
+import time
+from random import randint
+from functools import singledispatch, update_wrapper, wraps
 from types import SimpleNamespace
 import numpy as np
 from numpy import longcomplex as lc
+
+import cProfile
+import pstats
+
+def profile(output_file=None, sort_by='cumulative', lines_to_print=None, strip_dirs=False):
+    """Декоратор профайлера
+    http://code.activestate.com/recipes/577817-profile-decorator/
+    @type output_file: str
+    @param output_file: Наименование файла для записи результата. По умолчанию
+        будет записан в текущую папку с текущим временем.
+    @type sort_by: str, tuple, list
+    @param sort_by: По какому критерию будет происходить сортировка
+            https://docs.python.org/3/library/profile.html#pstats.Stats.sort_stats
+    @type lines_to_print: int
+    @param lines_to_print: Количество строк вывода.
+    @type strip_dirs: bool
+    @returns: Профайлер для функции
+    """
+
+    def inner(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            ctm = time.localtime()
+            ctm = time.strftime("%H%M%S", ctm)
+            salt = str(randint(100, 999))
+            _output_file = output_file or f"{func.__name__}{ctm}_{salt}.prof"
+            pr = cProfile.Profile()
+            pr.enable()
+            retval = func(*args, **kwargs)
+            pr.disable()
+            pr.dump_stats(_output_file)
+
+            with open(_output_file, 'w') as f:
+                ps = pstats.Stats(pr, stream=f)
+                if strip_dirs:
+                    ps.strip_dirs()
+                if isinstance(sort_by, (tuple, list)):
+                    ps.sort_stats(*sort_by)
+                else:
+                    ps.sort_stats(sort_by)
+                ps.print_stats(lines_to_print)
+            return retval
+
+        return wrapper
+
+    return inner
 
 def methdispatch(func):
     """ Декоратор для перегрузки функций.

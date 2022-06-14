@@ -5,11 +5,13 @@ from Deg3Solvers.Baydoun import Solver as BSolver
 from Deg3Solvers.Vieta import Solver as VSolver
 from MethodsArray import Array
 
+from GenerateEquations import StartEquationsTest
 
-menu = ConsoleMenu("PolynomDeg3Solver", "КМБО, 2022")
+
+menu = ConsoleMenu("PolynomDeg3Solver", "КМБО-03-20, 2022")
 methods = {
-    "vieta": VSolver(),
-    "bayd": BSolver()
+    "Vieta": VSolver(),
+    "Baydoun": BSolver()
 }
 
 def inp(method):
@@ -24,15 +26,13 @@ def inp(method):
         print(f"Коэффициенты введены неверно. {ex}")
         input()
 
-# A FunctionItem runs a Python function when selected
-Vieta_item = FunctionItem("Виета", inp, ["vieta"])
-Baydoun_item = FunctionItem("Baydoun", inp, ["bayd"])
+Vieta_item = FunctionItem("Виета", inp, ["Vieta"])
+Baydoun_item = FunctionItem("Baydoun", inp, ["Baydoun"])
+Testing_item = FunctionItem("Тестирование", StartEquationsTest, kwargs=methods)
 
-
-selection_menu = SelectionMenu(["item1", "item2", "item3"])
-submenu_item = SubmenuItem("Submenu item", selection_menu, menu)
 
 menu.append_item(Vieta_item)
 menu.append_item(Baydoun_item)
+menu.append_item(Testing_item)
 
 menu.show()

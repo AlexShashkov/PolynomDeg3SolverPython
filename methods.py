@@ -74,7 +74,7 @@ def fastpow(x, deg):
     return ans
 
 def geneq(args:"Array") -> "Array":
-    print("workng with row", args)
+    # print("workng with row", args)
     def _mul(x):
         return x[0]*x[1]
     """ Генерация полинома третьей степени
