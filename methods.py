@@ -38,10 +38,11 @@ def arg(x, y):
         else:
             return 2*np.pi - np.arctan(np.absolute(y/x))
     elif x < 0:
+        _t =np.arctan(np.absolute(y/x))
         if y >= 0:
-            return np.pi - np.arctan(np.absolute(y/x))
+            return np.pi - _t
         else:
-            return np.pi + np.arctan(np.absolute(y/x))
+            return np.pi + _t
     elif x == 0:
         if y > 0:
             return np.pi/2
