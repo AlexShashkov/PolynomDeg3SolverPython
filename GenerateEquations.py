@@ -22,6 +22,9 @@ def StartEquationsTest(**kwargs):
     data = generateEquations(inp)
     coeffs = Array(data[0])
     answers = Array(data[1])
+    res = {}
+
+    print("Входные данные:", coeffs)
 
     for name, solver in kwargs.items():
         print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
@@ -30,7 +33,12 @@ def StartEquationsTest(**kwargs):
         result = caller(solver, coeffs)
         elapsed = time.process_time_ns() - t
         print(f"Решено за {elapsed} наносекунд.")
-    a = input("vse")
+        print("Получено:", result)
+        print("Ожидалось:", answers)
+        res[name] = np.isclose(answers(), result(), rtol=.01)
+
+    print(res)
+    a = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
 
 # a = Baydoun(coeffs)
 # b = Vieta(coeffs)

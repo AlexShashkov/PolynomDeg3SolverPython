@@ -1,7 +1,7 @@
 import methods
 from methods import arg, fastpow as fpow
 from functools import singledispatch, update_wrapper
-from MethodsArray import Array, Struct
+from MethodsArray import Array, Struct, profile
 import numpy as np
 from numpy import longcomplex as lc, power as npow
 import os
@@ -31,6 +31,7 @@ class Solver(object):
         newArray = np.apply_along_axis(self._solve, 1, newArray)
         return Array(newArray)
 
+    # @profile(strip_dirs=True)
     def _checkA(self, row):
         """Модификация строки входных данных. Вычисление вспомогательных степеней.
         @type row: Array
@@ -61,6 +62,7 @@ class Solver(object):
         # print("b", bar, "\nc", car, "\nd", dar, "\na", a)
         return np.array([dar, car, bar, a], dtype=object)
 
+    # @profile(strip_dirs=True)
     def _part2(self, row, o, r):
         """ Вычисление корней для случая, когда o != r.
 

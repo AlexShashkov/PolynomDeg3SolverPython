@@ -15,7 +15,7 @@ methods = {
 }
 
 def inp(method):
-    print("Введите через пробел коэффициенты при x^3, x^2, x и c\n")
+    print("Введите через пробел коэффициенты при c, x, x^2, x^3\n")
     got = input("> ")
     try:
         arr = Array(got.split())
