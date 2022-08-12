@@ -55,11 +55,13 @@ class Solver(object):
         d = newCol[0]
 
         # Вычислим степени с помощью fastpow 
+        # Заменить на numpy.pow, т.к. все-равно реализация на c++ быстрее
         b_arr = [b]
         c_arr = [c]
         d_arr = [d]
         degs = [i for i in range(2, 7)]
         # print(degs[:4])
+        # map замениить на цикл, который будет умножать на предыдущее значение
         b_arr.extend(list(map(lambda x, deg: fpow(x, deg), [b for i in range(5)], degs)))
         c_arr.extend(list(map(lambda x, deg: fpow(x, deg), [c for i in range(5)], degs[:3])))
         d_arr.extend(list(map(lambda x, deg: fpow(x, deg), [d for i in range(5)], degs[:2])))
@@ -155,8 +157,13 @@ class Solver(object):
         # print(arg2_2.real,arg2_2.imag)
 
         # Вычисляем аргумент комплексного числа
-        phi1 = np.angle(arg1_1.real, arg1_1.imag) - np.angle(arg1_2.real, arg1_2.imag)
-        phi2 = np.angle(arg2_1.real, arg2_1.imag) - np.angle(arg2_2.real, arg2_2.imag)
+        print("Argument of complex numbers")
+        print(arg1_1, arg(arg1_1.real, arg1_1.imag), "vs", np.angle(arg1_1))
+        print(arg1_2, arg(arg1_2.real, arg1_2.imag), "vs", np.angle(arg1_2))
+        print(arg2_1, arg(arg2_1.real, arg2_1.imag), "vs", np.angle(arg2_1))
+        print(arg2_2, arg(arg2_2.real, arg2_2.imag), "vs", np.angle(arg2_2))
+        phi1 = np.angle(arg1_1) - np.angle(arg1_2)
+        phi2 = np.angle(arg2_1) - np.angle(arg2_2)
 
 
         a1 = (sqrt3ftwo)*(np.cos(phi1)+1j*np.sin(phi1))
@@ -205,6 +212,7 @@ class Solver(object):
         r = (2*b[2] - 9*b[0]*c[0] + 27*d[0])*self.one27
         arr = None
         if o == 0 and r ==0:
+            print("Действительные корни")
             # Стандартные действительные корни
             x1 = x2 = x3 = -self.bthree
             arr = [x1, x2, x3]
