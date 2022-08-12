@@ -101,14 +101,14 @@ class Solver(object):
             phi = methods.arch(np.abs(R)/np.sqrt(absQ3))/3
             T = np.sign(R)*sqrtabsQ*methods.ch(phi)
             sqrtsh = self.sqrt3*sqrtabsQ*methods.sh(phi)
-            x2 = T - inp2three +1j*sqrtsh
-            x3 = T - inp2three -1j*sqrtsh
+            x2 = T -inp2three +1j*sqrtsh
+            x3 = T -inp2three -1j*sqrtsh
         else:
             phi = methods.arsh(np.abs(R)/np.sqrt(np.abs(Q[1])))/3
             T = np.sign(R)*sqrtabsQ*methods.sh(phi)
             sqrtch = self.sqrt3*sqrtabsQ*methods.ch(phi)
-            x2 = T - inp2three+1j*sqrtch
-            x3 = T - inp2three-1j*sqrtch
+            x2 = T -inp2three + 1j*sqrtch
+            x3 = T -inp2three - 1j*sqrtch
         #print(f"Phi: {phi}, T: {T}")
         x1 = -2*T-inp2three
         return (x1, x2, x3)

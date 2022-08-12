@@ -38,7 +38,7 @@ def StartEquationsTest(**kwargs):
         res[name] = np.isclose(answers(), result(), rtol=.01)
 
     print(res)
-    a = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
+    _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
 
 # a = Baydoun(coeffs)
 # b = Vieta(coeffs)
