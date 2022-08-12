@@ -98,19 +98,15 @@ class Solver(object):
         d0 = 4*b[3]*c[1] - 4*b[2]*c0d0 - 14*b[1]*c[2] + b[1]*d[1] + 28*b0c1*d[0] + c[3] - 12*c[0]*d[1]
 
         sqrt1 = None
-        # Это точно правильно?
         if o > 0:
             sqrt1 = npow(o + 0j, 0.5)
         else:
             sqrt1 = lc(0+1j)*npow(abs(o)+0j, 0.5)
-        # Тоже сомнения
         sqrt2 = lc(0+1j)*self.sqrt3
         sqrt3 = lc(self.cbrt4)
 
         sqrt2div3 = sqrt2*self.onethree
         sqrt2div9 = sqrt2*self.onenine
-
-        sqrt2ftwo = sqrt2*0.5
         sqrt3ftwo = sqrt3*0.5
 
         bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 4*b[0]*c0d0 + 2*c[2] + d[1]) + (sqrt2div9)*t
@@ -119,7 +115,7 @@ class Solver(object):
         bl1 = npow(bl, self.onethree)
         bl2 = npow(bl1, 2)
         A1 = (-2*sqrt2div3)*(4*b[2]*c[0] - 2*d[0]*b[1] - 13*b0c1 + 15*c0d0) + 2*c[0]*sqrt1
-        A2 = 8*b[4]*c[1] - 8*b[3]*c0d0 - 40*b[2]*c[2] + 2*b[2]*d[1] + 29*b1c1*d[0] #Че  за хуйня?1
+        A2 = 8*b[4]*c[1] - 8*b[3]*c0d0 - 40*b[2]*c[2] + 2*b[2]*d[1] + 29*b1c1*d[0]
         A2 += 23*b[0]*c[3] - 99*b0c0*d[1] - 21*c[2]*d[0] + 27*d[2] -\
         sqrt1*sqrt2 * (2*b1c1 - 10*b[0]*c0d0 + c[2] + 3*d[1])
 
@@ -143,25 +139,16 @@ class Solver(object):
         #print(R1, R2)
 
 
-        M = [-1, 0.5 - sqrt2ftwo, 0.5 + sqrt2ftwo]
-        M2 = [1, -0.5 - sqrt2ftwo, -0.5 + sqrt2ftwo]
+        M = [-1, 0.5 - sqrt2*0.5, 0.5 + sqrt2*0.5]
+        M2 = [1, -0.5 - sqrt2*0.5, -0.5 + sqrt2*0.5]
 
         # print("args")
         arg1_1 = A1*bl1
         arg1_2 = -d0*R1
         arg2_1 = A2*bl2
         arg2_2 = npow(d0, 2)*R2
-        # print(arg1_1.real,arg1_1.imag)
-        # print(arg1_2.real, arg1_2.imag)
-        # print(arg2_1.real, arg2_1.imag)
-        # print(arg2_2.real,arg2_2.imag)
 
         # Вычисляем аргумент комплексного числа
-        print("Argument of complex numbers")
-        print(arg1_1, arg(arg1_1.real, arg1_1.imag), "vs", np.angle(arg1_1))
-        print(arg1_2, arg(arg1_2.real, arg1_2.imag), "vs", np.angle(arg1_2))
-        print(arg2_1, arg(arg2_1.real, arg2_1.imag), "vs", np.angle(arg2_1))
-        print(arg2_2, arg(arg2_2.real, arg2_2.imag), "vs", np.angle(arg2_2))
         phi1 = np.angle(arg1_1) - np.angle(arg1_2)
         phi2 = np.angle(arg2_1) - np.angle(arg2_2)
 

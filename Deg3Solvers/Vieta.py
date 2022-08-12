@@ -13,6 +13,12 @@ class Solver(object):
     def __init__(self):
         self.pidiv3 = np.pi/3
         self.sqrt3 = np.sqrt(3)
+        self.onetwo = 1/2
+        self.onethree = 1/3
+        self.onesix = self.onetwo*self.onethree
+        self.onenine = self.onethree * self.onethree
+        self.one27 = self.onenine*self.onethree
+        self.one54 = 1/54
     def __call__(self, array:"Array") -> "Array":
         """Функтор для решения уравнений методом Виета.
 
@@ -63,15 +69,15 @@ class Solver(object):
         @rtype: Array
         @returns: Объект типа Array с решениями уравнения.
         """
-        inp2three = inp[2]/3
+        inp2three = inp[2]*self.onethree
 
-        phi = np.arccos(R/np.sqrt(Q[1]))/3
+        phi = np.arccos(R/np.sqrt(Q[1]))*self.onethree
         #print("Usual method")
         #print(f"Phi: {phi} ")
 
         sqrtQ = 2*np.sqrt(Q[0])
         x1 = -sqrtQ*np.cos(phi)-inp2three
-        x2 = sqrtQ*np.cos(phi+2*self.pidiv3)-inp2three
+        x2 = -sqrtQ*np.cos(phi+2*self.pidiv3)-inp2three
         x3 = -sqrtQ*np.cos(phi-2*self.pidiv3)-inp2three
         return (x1, x2, x3)
 
@@ -91,24 +97,28 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print("Complex method")
-        inp2three = inp[2]/3
+        inp2three = inp[2]*self.onethree
         phi = 0
         T = 0
         x2, x3 = 0, 0
         absQ3 = np.abs(Q[1])
         sqrtabsQ = np.sqrt(np.abs(Q[0]))
         if Q[0]>0:
-            phi = methods.arch(np.abs(R)/np.sqrt(absQ3))/3
+            phi = methods.arch(np.abs(R)/np.sqrt(absQ3))*self.onethree
             T = np.sign(R)*sqrtabsQ*methods.ch(phi)
             sqrtsh = self.sqrt3*sqrtabsQ*methods.sh(phi)
-            x2 = T -inp2three +1j*sqrtsh
-            x3 = T -inp2three -1j*sqrtsh
+            Tin = T - inp2three
+            sqrtsh *= 1j
+            x2 = Tin + sqrtsh
+            x3 = Tin - sqrtsh
         else:
-            phi = methods.arsh(np.abs(R)/np.sqrt(np.abs(Q[1])))/3
+            phi = methods.arsh(np.abs(R)/np.sqrt(absQ3))*self.onethree
             T = np.sign(R)*sqrtabsQ*methods.sh(phi)
             sqrtch = self.sqrt3*sqrtabsQ*methods.ch(phi)
-            x2 = T -inp2three + 1j*sqrtch
-            x3 = T -inp2three - 1j*sqrtch
+            Tin = T - inp2three
+            sqrtch *= 1j
+            x2 = Tin + sqrtch
+            x3 = Tin - sqrtch
         #print(f"Phi: {phi}, T: {T}")
         x1 = -2*T-inp2three
         return (x1, x2, x3)
@@ -129,9 +139,10 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print("Degenerate method")
-        inp2three = inp[2]/3
-        x1 = -2*np.cbrt(R.real)-inp2three
-        x2 = np.cbrt(R.real)-inp2three
+        inp2three = inp[2]*self.onethree
+        _x = np.cbrt(R.real)
+        x1 = -2*_x-inp2three
+        x2 = _x-inp2three
         return (x1, x2, np.NaN)
 
     def _solve(self, inp):
@@ -147,8 +158,8 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print(f"Input: {inp}")
-        Q = (fpow(inp[2], 2) - 3*inp[1])/9
-        R = (2*fpow(inp[2], 3)-9*inp[1]*inp[2]+27*inp[0])/54
+        Q = fpow(inp[2], 2)*self.onenine - inp[1]*self.onethree
+        R = fpow(inp[2], 3)*self.one27-inp[1]*inp[2]*self.onesix+inp[0]*self.onetwo
         Q3 = npow(Q, 3)
         R2 = npow(R, 2)
         S = Q3 - R2
