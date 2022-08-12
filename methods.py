@@ -1,6 +1,8 @@
 from functools import reduce
 from numpy import longdouble as ld
 import numpy as np
+from numpy.polynomial import polynomial as P
+import random
 def arsh(x):
     """ Аршинус
     @param x: От чего необходимо вычислить аршинус
@@ -11,7 +13,8 @@ def arch(x):
     """ Аркошинус
     @param x: От чего необходимо вычислить аркошинус
     """
-    return np.log(x - np.sqrt(x**ld(2)-ld(1)))
+    # return np.log(x - np.sqrt(x**ld(2)-ld(1)))
+    return np.arccosh(x)
 
 def sh(x):
     """ Шинус
@@ -25,37 +28,11 @@ def ch(x):
     """
     return (np.exp(x) + np.exp(-x))/ld(2)
 
-def arg(x, y):
-    """ Аргумент комплексного числа
-    @type x: number
-    @param x: Действительная часть
-    @type y: number
-    @param y: Мнимая часть
-    """
-    if x > 0:
-        if y >= 0:
-            return np.arctan(y/x)
-        else:
-            return 2*np.pi - np.arctan(np.absolute(y/x))
-    elif x < 0:
-        _t =np.arctan(np.absolute(y/x))
-        if y >= 0:
-            return np.pi - _t
-        else:
-            return np.pi + _t
-    elif x == 0:
-        if y > 0:
-            return np.pi/2
-        elif y < 0:
-            return (3*np.pi)/2
-        else:
-            return 0
-    else:
-        raise ValueError("Invalid type of complex z")
 
 def fastpow(x, deg):
     """ Быстрое возведение в степень для натуральных чисел
     https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+    Numpy решает все-равно быстрее
     @type x: int
     @param x: Число, которое необходимо возвести в степень.
     @type def: int
@@ -77,26 +54,6 @@ def fastpow(x, deg):
         x *= x
     return ans
 
-def geneq(args:"Array") -> "Array":
-    # print("workng with row", args)
-    def _mul(x):
-        return x[0]*x[1]
-    """ Генерация полинома третьей степени
-    @type args: Array
-    @param args: Корни полинома
-    @rtype: Array
-    @returns: Коэффициенты полинома для заданных корней
-    """
-    # X^3 : 1
-    # X^2
-    X = reduce(lambda x,y: x + y, args)
-    #X
-    Y = _mul(args[:2]) +  _mul(args[1:]) + _mul(args[0::2])
-    # C
-    Z = reduce(lambda x, y: x*y, args)
-    return [Z, Y, X, 1]
-
-
 def generateEquationsFromReady(array:"Array") -> list:
     """ Сгенерировать коэффициенты полиномов по корням
     @type array: Array
@@ -104,21 +61,84 @@ def generateEquationsFromReady(array:"Array") -> list:
     @rtype: list
     @returns: Трехмерный список из коэффицентов и корней
     """
-    vals = np.apply_along_axis(geneq, 1, array)
+    vals = np.apply_along_axis(P.polyfromroots, 1, array)
     return [vals, array]
 
 
-def generateEquations(count=10, frm=0, to=100) -> list:
-    """ Сгенерировать коэффициенты полиномов и корни
+def generateComplexEquations(count=10) -> list:
+    """ Сгенерировать коэффициенты полиномов и комплексные корни
     @type count: int
     @param count: Количество полиномов
-    @type frm: int
-    @param count: Минимальное значение корня
-    @type to: int
-    @param count: Максимальное значение корня
     @rtype: list
     @returns: Трехмерный список из коэффицентов и корней
     """
-    arr = np.random.randint(frm+1, to+1, (count, 3)).astype("float")
+    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
+    arr = np.random.rand(count, 3) + np.random.rand(count, 3) * 1j
 
+    return generateEquationsFromReady(arr)
+
+def generateEquations(count=10) -> list:
+    """ Сгенерировать коэффициенты полиномов и действительные корни
+    @type count: int
+    @param count: Количество полиномов
+    @rtype: list
+    @returns: Трехмерный список из коэффицентов и корней
+    """
+    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
+    arr = np.random.rand(count, 3)
+
+    return generateEquationsFromReady(arr)
+
+
+def generateExponentEquations(count=10, max=1, min=0) -> list:
+    """ Сгенерировать коэффициенты полиномов и комплексные корни
+    с помощью экспонент
+    @type count: int
+    @param count: Количество полиномов
+    @type max: int
+    @param count: Максимально возможная степень экспоненты
+    @type min: int
+    @param count: Минимально возможная степень экспоненты
+    @rtype: list
+    @returns: Трехмерный список из коэффицентов и корней
+    """
+    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
+    def rnd():
+        exp = random.randint(min, max)
+        significand = 0.9 * random.random() + 0.1
+        return significand * 10**exp
+    arr = []
+    for i in range(count):
+        arr.append([rnd() for _ in range(3)])
+    arr = np.array(arr)
+
+    return generateEquationsFromReady(arr)
+
+def generateExponentComplexEquations(count=10, max=1, min=0) -> list:
+    """ Сгенерировать коэффициенты полиномов и комплексные корни
+    с помощью экспонент
+    @type count: int
+    @param count: Количество полиномов
+    @type max: int
+    @param count: Максимально возможная степень экспоненты
+    @type min: int
+    @param count: Минимально возможная степень экспоненты
+    @rtype: list
+    @returns: Трехмерный список из коэффицентов и корней
+    """
+    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
+    def rnd():
+        exp = random.randint(min, max)
+        significand = 0.9 * random.random() + 0.1
+        return significand * 10**exp
+    arr = []
+    for i in range(count):
+        arr.append([rnd() for _ in range(3)])
+    arr = np.array(arr)
+
+    carr = []
+    for i in range(count):
+        carr.append([rnd() for _ in range(3)])
+    carr = np.array(arr)*1j
+    arr = arr + carr
     return generateEquationsFromReady(arr)

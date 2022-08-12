@@ -158,8 +158,8 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         #print(f"Input: {inp}")
-        Q = fpow(inp[2], 2)*self.onenine - inp[1]*self.onethree
-        R = fpow(inp[2], 3)*self.one27-inp[1]*inp[2]*self.onesix+inp[0]*self.onetwo
+        Q = npow(inp[2], 2)*self.onenine - inp[1]*self.onethree
+        R = npow(inp[2], 3)*self.one27-inp[1]*inp[2]*self.onesix+inp[0]*self.onetwo
         Q3 = npow(Q, 3)
         R2 = npow(R, 2)
         S = Q3 - R2
