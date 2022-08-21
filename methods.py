@@ -3,30 +3,6 @@ from numpy import longdouble as ld
 import numpy as np
 from numpy.polynomial import polynomial as P
 import random
-def arsh(x):
-    """ Аршинус
-    @param x: От чего необходимо вычислить аршинус
-    """
-    return np.log(x + np.sqrt(x**ld(2)+ld(1)))
-
-def arch(x):
-    """ Аркошинус
-    @param x: От чего необходимо вычислить аркошинус
-    """
-    # return np.log(x - np.sqrt(x**ld(2)-ld(1)))
-    return np.arccosh(x)
-
-def sh(x):
-    """ Шинус
-    @param x: От чего необходимо вычислить шинус
-    """
-    return (np.exp(x) - np.exp(-x))/ld(2)
-
-def ch(x):
-    """ Кошинус
-    @param x: От чего необходимо вычислить кошинус
-    """
-    return (np.exp(x) + np.exp(-x))/ld(2)
 
 
 def fastpow(x, deg):
@@ -64,7 +40,6 @@ def generateEquationsFromReady(array:"Array") -> list:
     vals = np.apply_along_axis(P.polyfromroots, 1, array)
     return [vals, array]
 
-
 def generateComplexEquations(count=10) -> list:
     """ Сгенерировать коэффициенты полиномов и комплексные корни
     @type count: int
@@ -77,41 +52,19 @@ def generateComplexEquations(count=10) -> list:
 
     return generateEquationsFromReady(arr)
 
-def generateEquations(count=10) -> list:
-    """ Сгенерировать коэффициенты полиномов и действительные корни
-    @type count: int
-    @param count: Количество полиномов
-    @rtype: list
-    @returns: Трехмерный список из коэффицентов и корней
-    """
-    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
-    arr = np.random.rand(count, 3)
-
-    return generateEquationsFromReady(arr)
-
-
-def generateExponentEquations(count=10, max=1, min=0) -> list:
+def generateIntegerEquations(count=10, max=1, min=0) -> list:
     """ Сгенерировать коэффициенты полиномов и комплексные корни
-    с помощью экспонент
     @type count: int
     @param count: Количество полиномов
     @type max: int
-    @param count: Максимально возможная степень экспоненты
+    @param count: Максимально возможный коень
     @type min: int
-    @param count: Минимально возможная степень экспоненты
+    @param count: Минимально возможный корень
     @rtype: list
     @returns: Трехмерный список из коэффицентов и корней
     """
-    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
-    def rnd():
-        exp = random.randint(min, max)
-        significand = 0.9 * random.random() + 0.1
-        return significand * 10**exp
-    arr = []
-    for i in range(count):
-        arr.append([rnd() for _ in range(3)])
-    arr = np.array(arr)
-
+    arr = np.random.randint(min, max, (count, 3)) + \
+        np.random.randint(min, max, (count, 3))*1j
     return generateEquationsFromReady(arr)
 
 def generateExponentComplexEquations(count=10, max=1, min=0) -> list:

@@ -1,7 +1,5 @@
-import methods
-from methods import fastpow as fpow
 from functools import singledispatch, update_wrapper
-from MethodsArray import Array, Struct, profile
+from MethodsArray import Array, profile
 import numpy as np
 from numpy import longcomplex as lc, power as npow
 import os
@@ -17,6 +15,7 @@ class Solver(object):
         self.twothree = self.onethree*2
         self.sqrt3 = np.sqrt(3)
         self.cbrt4 = np.cbrt(4)
+
     def __call__(self, array:"Array") -> "Array":
         """Функтор для решения уравнений методом Baydoun.
         @type array: Array
@@ -43,8 +42,6 @@ class Solver(object):
         @returns: Измененная строка с вычисленными степенями.
         """
         newCol = row.copy()
-        # print(row.shape)
-        # vseprint(row)
         # В случае если число настолько маленькое и может вызвать переполнение, приведя к inf, то появится исключение из строки 9.
         if row[3] != lc(0):
             divThrid = 1/row[3]
@@ -54,17 +51,15 @@ class Solver(object):
         c = newCol[1]
         d = newCol[0]
 
-        # Вычислим степени с помощью fastpow 
-        # Заменить на numpy.pow, т.к. все-равно реализация на c++ быстрее
         b_arr = [b]
         c_arr = [c]
         d_arr = [d]
-        degs = [i for i in range(2, 7)]
-        # print(degs[:4])
-        # map замениить на цикл, который будет умножать на предыдущее значение
-        b_arr.extend(list(map(lambda x, deg: fpow(x, deg), [b for i in range(5)], degs)))
-        c_arr.extend(list(map(lambda x, deg: fpow(x, deg), [c for i in range(5)], degs[:3])))
-        d_arr.extend(list(map(lambda x, deg: fpow(x, deg), [d for i in range(5)], degs[:2])))
+        for i in range(5):
+            b_arr.append(b_arr[i]*b_arr[0])
+        for i in range(3):
+            c_arr.append(c_arr[i]*c_arr[0])
+        for i in range(2):
+            d_arr.append(d_arr[i]*d_arr[0])
         # print("b", b_arr, "\nc", c_arr, "\nd", d_arr, "\na", a)
         return np.array([d_arr, c_arr, b_arr, a], dtype=object)
 
@@ -86,15 +81,10 @@ class Solver(object):
         b = row[2]
         c = row[1]
         d = row[0]
-        # print("o:", o)
-        # print("r:", r)
         c0d0 = c[0]*d[0]
         b0c0 = b[0]*c[0]
         b0c1 = b[0]*c[1]
         b1c1 = b[1]*c[1]*4
-        #t = 2*c[2] * (8*b[5] + 132*b[2]*d[0] + 36*d[1] + c[2] + 33*b[1] * \
-                #    c[1] - 66*b[0]*c0d0) + 12*b[3]*c[0] * (d[1] - 7*c[2]) - b[1] * \
-                # c[1]*d[0]*(24*b[2]+291*d[0]) + d[2]*(144*b0c0 - 2*b[2] - 27*d[0])
 
         t = 2*c[2] * (4*(2*b[5] + 9*d[1]) + 33*(4*b[2]*d[0]  + b[1]*c[1] - \
             2*b[0]*c0d0) + c[2] ) + 12*b[3]*c[0] * (d[1] - 7*c[2]) - b[1] * \
@@ -114,8 +104,6 @@ class Solver(object):
         sqrt3ftwo = sqrt3*0.5
 
         bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 2*(2*b[0]*c0d0 - c[2]) + d[1]) + (sqrt2div9)*t
-        # print(bl)
-        # Numpy cubic root не работает с комплексными числами.
         bl1 = npow(bl, self.onethree)
         bl2 = npow(bl1, 2)
         A1 = 2*((-sqrt2div3)*(2*(2*b[2]*c[0] - d[0]*b[1]) - 13*b0c1 + 15*c0d0) + c[0]*sqrt1)
@@ -124,9 +112,6 @@ class Solver(object):
             3*(3*d[2] - 11*b0c0*d[1])) -sqrt1*sqrt2 * (2*(b1c1 - 5*b[0]*c0d0) + c[2] + 3*d[1])
 
         Rbase = sqrt1 * sqrt2div9
-        #print(Rbase)
-        #print(r)
-        # Numpy cubic root не работает с комплексными числами.
         R1 = None
         R2 = None
         if o == 0:
@@ -140,13 +125,11 @@ class Solver(object):
             R1 = npow(Rbase + r, self.onethree)
             R2 = npow(Rbase - r, self.onethree)
 
-        #print(R1, R2)
 
 
         M = [-1, 0.5 - sqrt2*0.5, 0.5 + sqrt2*0.5]
         M2 = [1, -0.5 - sqrt2*0.5, -0.5 + sqrt2*0.5]
 
-        # print("args")
         arg1_1 = A1*bl1
         arg1_2 = -d0*R1
         arg2_1 = A2*bl2
@@ -160,8 +143,6 @@ class Solver(object):
         a1 = (sqrt3ftwo)*(np.cos(phi1)+1j*np.sin(phi1))
         a2 = (sqrt3ftwo)*(np.cos(phi2)+1j*np.sin(phi2))
 
-        # print("alphas: ", a1, a2)
-        # print("M2:", M[2], M2[2])
         a1R1 = a1*R1
         a2R2 = a2*R2
         x1 = M[0]*a1R1 + M2[0]*a2R2 - self.bthree
@@ -195,13 +176,7 @@ class Solver(object):
 
 
         self.bthree = b[0]*self.onethree
-        # print("values:")
-        # print(b)
-        # print(c)
-        # print(d)
-        # o = -4*b[2]*d[0] + b[1]*c[1] + 18*b[0]*c[0]*d[0] - 4*c[2] - 27*d[1]
         o = -4*(b[2]*d[0] + c[2]) + b[1]*c[1] + 9*(2*b[0]*c[0]*d[0] - 3*d[1])
-        # r = (2*b[2] - 9*b[0]*c[0] + 27*d[0])*self.one27
         r = (2*b[2] + 9*(-b[0]*c[0] + 3*d[0]))*self.one27
         arr = None
         if o == 0 and r ==0:

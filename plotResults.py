@@ -1,11 +1,27 @@
 import matplotlib.pyplot as plt
+from PIL import Image
 
-def plotSimpleTest(**kwargs):
+def plotTest(title, data):
     """
     График для нескольких тестов
     """
-    fig, ax = plt.subplots()
-    for name, results in kwargs.items():
-        line, = ax.plot(results[0], results[1], label=f"${name}")
-    ax.legend()
-    plt.show()
+    fig, ax = plt.subplots(len(data.keys()), 1)
+    cntr = 0
+    for name, results in data.items():
+        x = [item["step"] for item in results]
+        falseres = []
+        trueres = []
+        for got in results:
+            for res, value in got["result"].items():
+                if res == False: falseres.append(value)
+                else: trueres.append(value)
+        line, = ax[cntr].plot(x, falseres, \
+                label=f"{name}: wrong ans.")
+        line, = ax[cntr].plot(x, trueres, \
+                label=f"{name}: correct ans.")
+        ax[cntr].legend()
+        cntr += 1
+    plt.title(title, loc="left", fontstyle="italic")
+    plt.savefig('testresults.png')
+    # with Image.open('testresults.png') as img:
+        # img.show()

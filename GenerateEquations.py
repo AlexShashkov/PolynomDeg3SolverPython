@@ -13,7 +13,7 @@ def test(solver, coeffs, answers, rtol) -> list:
         print("Получено:", _result)
         print("Ожидалось:", _answers)
         _result = np.isclose(_answers, _result, rtol=rtol)
-        # print(_result)
+        print(_result)
         unique, counts = np.unique(_result, return_counts=True)
         # print("Unique n counts")
         # print(unique)
@@ -47,10 +47,10 @@ def StartEquationsTest(generator, **kwargs) -> None:
         elapsed, unique, count = test(solver, coeffs, answers, rtol)
         print(f"Решено за {elapsed} тактов.")
         test_result = {
-                "time":elapsed,
-                "res":len(unique),
-                "unique":unique,
-                "count":count
+            "time":elapsed,
+            "res":len(unique),
+            "unique":unique,
+            "count":count
         }
         res[name] = test_result
 
@@ -59,6 +59,66 @@ def StartEquationsTest(generator, **kwargs) -> None:
 
 
 def StartEquationsMinValueTest(generator, **kwargs) -> None:
+    inp    = None
+    rtol   = None
+    maxVal = None
+    minVal = None
+    step   = None
+    while True:
+        try:
+            inp = input("Введите количество полиномов, которые будут сгенерированы. >")
+            inp = int(inp)
+            rtol = input("Введите допустимую погршеность. >")
+            rtol = int(inp)
+            maxVal = input("Введите максимальный разряд. >")
+            maxVal = float(maxVal)
+            minVal = input("Введите минимальный разряд. >")
+            minVal = float(minVal)
+            step = input("Введите шаг. >")
+            step = float(step)
+            if minVal > maxVal: raise("Минимальное значение не может быть больше \
+                    максимального!")
+        except Exception as ex:
+            print("Ошибка. Попробуйте еще раз:", ex)
+            continue
+        break
+
+    res = {}
+    for name, _ in kwargs.items():
+        res[name] = []
+
+    print(f"Начинаю тестирование разрядов от {maxVal} до {minVal}")
+    for i in np.arange(minVal, maxVal, step)[::-1]:
+        print(f"Разряд {i}")
+
+        data = generator(inp, 10, 0)
+        coeffs = Array(data[0]*i)
+        answers = Array(data[1]*i)
+        # print("Сгенерированные полиномы:\n", coeffs)
+        # print("Сгенерированные ответы:\n", answers)
+
+
+        for name, solver in kwargs.items():
+            print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
+            elapsed, unique, count = test(solver, coeffs, answers, rtol)
+            # print(f"Решено за {elapsed} тактов.")
+            # print(unique.shape)
+            results = dict(zip(unique, count))
+            if False not in results.keys(): results[False]=0
+            if True not in results.keys(): results[True]=0
+            # print(results)
+            test_result = {
+                "step":i,
+                "time":elapsed,
+                "result":results,
+            }
+            res[name].append(test_result)
+        # print(res)
+    plotTest(f"Проверка минимальных значений от {minVal} до {maxVal}", res)
+    _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
+
+def StartEquationsMinExpValueTest(generator, **kwargs) -> None:
+    # TODO: другая метрика для очень маленьких значений?
     inp = None
     rtol = None
     maxVal = None
@@ -79,6 +139,11 @@ def StartEquationsMinValueTest(generator, **kwargs) -> None:
             print("Ошибка. Попробуйте еще раз:", ex)
             continue
         break
+
+    res = {}
+    for name, _ in kwargs.items():
+        res[name] = []
+
     print(f"Начинаю тестирование экспонент от {maxVal} до {minVal}")
     for i in range(maxVal, minVal, -1):
         print(f"Минимальная проверка значений экспоненты {i}")
@@ -86,21 +151,25 @@ def StartEquationsMinValueTest(generator, **kwargs) -> None:
         data = generator(inp, i, i-1)
         coeffs = Array(data[0])
         answers = Array(data[1])
-        print("Сгенерированные полиномы:\n", coeffs)
-        print("Сгенерированные ответы:\n", answers)
-        res = {}
+        # print("Сгенерированные полиномы:\n", coeffs)
+        # print("Сгенерированные ответы:\n", answers)
 
 
         for name, solver in kwargs.items():
             print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
             elapsed, unique, count = test(solver, coeffs, answers, rtol)
-            print(f"Решено за {elapsed} тактов.")
+            # print(f"Решено за {elapsed} тактов.")
+            print(unique.shape)
+            results = dict(zip(unique, count))
+            if False not in results.keys(): results[False]=0
+            if True not in results.keys(): results[True]=0
+            # print(results)
             test_result = {
-                    "time":elapsed,
-                    "res":len(unique),
-                    "unique":unique,
-                    "count":count
+                "step":i,
+                "time":elapsed,
+                "result":results,
             }
-            res[name] = test_result
-        print(res)
+            res[name].append(test_result)
+        # print(res)
+    plotTest(f"Проверка минимальных значений, exp в степени [{maxVal}, {minVal}]", res)
     _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")

@@ -1,5 +1,3 @@
-import methods
-from methods import fastpow as fpow
 from functools import singledispatch, update_wrapper
 from MethodsArray import Array
 import numpy as np
@@ -104,17 +102,17 @@ class Solver(object):
         absQ3 = np.abs(Q[1])
         sqrtabsQ = np.sqrt(np.abs(Q[0]))
         if Q[0]>0:
-            phi = methods.arch(np.abs(R)/np.sqrt(absQ3))*self.onethree
-            T = np.sign(R)*sqrtabsQ*methods.ch(phi)
-            sqrtsh = self.sqrt3*sqrtabsQ*methods.sh(phi)
+            phi = np.arccosh(np.abs(R)/np.sqrt(absQ3), dtype=np.complex)*self.onethree
+            T = np.sign(R)*sqrtabsQ*np.cosh(phi)
+            sqrtsh = self.sqrt3*sqrtabsQ*np.sinh(phi)
             Tin = T - inp2three
             sqrtsh *= 1j
             x2 = Tin + sqrtsh
             x3 = Tin - sqrtsh
         else:
-            phi = methods.arsh(np.abs(R)/np.sqrt(absQ3))*self.onethree
-            T = np.sign(R)*sqrtabsQ*methods.sh(phi)
-            sqrtch = self.sqrt3*sqrtabsQ*methods.ch(phi)
+            phi = np.arcsinh(np.abs(R)/np.sqrt(absQ3), dtype=np.complex)*self.onethree
+            T = np.sign(R)*sqrtabsQ*np.sinh(phi)
+            sqrtch = self.sqrt3*sqrtabsQ*np.cosh(phi)
             Tin = T - inp2three
             sqrtch *= 1j
             x2 = Tin + sqrtch
