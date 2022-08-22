@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from PIL import Image
 
-def plotTest(title, data):
+def plotTest(time, title, data):
     """
     График для нескольких тестов
     """
@@ -21,7 +21,7 @@ def plotTest(title, data):
                 label=f"{name}: correct ans.")
         ax[cntr].legend()
         cntr += 1
-    plt.title(title, loc="left", fontstyle="italic")
-    plt.savefig('testresults.png')
+    plt.suptitle(title)
+    return plt
     # with Image.open('testresults.png') as img:
         # img.show()

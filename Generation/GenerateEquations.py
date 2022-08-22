@@ -1,27 +1,25 @@
 import time
+from datetime import datetime
 import numpy as np
 from MethodsArray import Array, profile
-from plotResults import *
-#import cProfile, pstats, io
+from Generation.plotResults import *
 
 def test(solver, coeffs, answers, rtol) -> list:
-        t = time.process_time_ns()
-        result = solver(coeffs)
-        elapsed = time.process_time_ns() - t
-        _result = np.sort(result())
-        _answers = np.sort(answers())
-        print("Получено:", _result)
-        print("Ожидалось:", _answers)
-        _result = np.isclose(_answers, _result, rtol=rtol)
-        print(_result)
-        unique, counts = np.unique(_result, return_counts=True)
-        # print("Unique n counts")
-        # print(unique)
-        # print(counts)
+    t = time.process_time_ns()
+    result = solver(coeffs)
+    elapsed = time.process_time_ns() - t
+    _result = np.sort(result())
+    _answers = np.sort(answers())
+    # print("Получено:", _result)
+    # print("Ожидалось:", _answers)
+    _result = np.isclose(_result, _answers, rtol=rtol)
+    # print(_result)
+    unique, counts = np.unique(_result, return_counts=True)
 
-        return (elapsed, unique, counts)
+    return (elapsed, unique, counts)
 
 def StartEquationsTest(generator, **kwargs) -> None:
+    start = str(datetime.now())
     inp = None
     rtol = None
     while True:
@@ -37,8 +35,8 @@ def StartEquationsTest(generator, **kwargs) -> None:
     data = generator(inp)
     coeffs = Array(data[0])
     answers = Array(data[1])
-    print("Сгенерированные полиномы:\n", coeffs)
-    print("Сгенерированные ответы:\n", answers)
+    # print("Сгенерированные полиномы:\n", coeffs)
+    # print("Сгенерированные ответы:\n", answers)
     res = {}
 
 
@@ -59,6 +57,7 @@ def StartEquationsTest(generator, **kwargs) -> None:
 
 
 def StartEquationsMinValueTest(generator, **kwargs) -> None:
+    start = str(datetime.now())
     inp    = None
     rtol   = None
     maxVal = None
@@ -114,11 +113,13 @@ def StartEquationsMinValueTest(generator, **kwargs) -> None:
             }
             res[name].append(test_result)
         # print(res)
-    plotTest(f"Проверка минимальных значений от {minVal} до {maxVal}", res)
+    plt = plotTest(start, f"Проверка минимальных значений от {minVal} до {maxVal}", res)
+    plt.savefig(f"many-{rtol}-{step}-{time}.png")
     _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
 
 def StartEquationsMinExpValueTest(generator, **kwargs) -> None:
     # TODO: другая метрика для очень маленьких значений?
+    start = str(datetime.now())
     inp = None
     rtol = None
     maxVal = None
@@ -171,5 +172,6 @@ def StartEquationsMinExpValueTest(generator, **kwargs) -> None:
             }
             res[name].append(test_result)
         # print(res)
-    plotTest(f"Проверка минимальных значений, exp в степени [{maxVal}, {minVal}]", res)
+    plt = plotTest(start, f"Проверка минимальных значений, exp в степени [{maxVal},{minVal}].", res)
+    plt.savefig(f"many-{rtol}-{step}-{time}.png")
     _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")

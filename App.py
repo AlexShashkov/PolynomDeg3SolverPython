@@ -1,12 +1,14 @@
 from consolemenu import *
 from consolemenu.items import *
 from numpy import longcomplex as lc
+
 from Deg3Solvers.Baydoun import Solver as BSolver
 from Deg3Solvers.Vieta import Solver as VSolver
-from MethodsArray import Array
-from methods import *
 
-from GenerateEquations import *
+from MethodsArray import Array
+
+from Generation.methods import *
+from Generation.GenerateEquations import *
 
 
 menu = ConsoleMenu("PolynomDeg3Solver", "КМБО-03-20, 2022")
@@ -40,6 +42,6 @@ menu.append_item(Vieta_item)
 menu.append_item(Baydoun_item)
 menu.append_item(Testing_item2)
 menu.append_item(Testing_item3)
-menu.append_item(Testing_item4)
+# menu.append_item(Testing_item4)
 
 menu.show()

@@ -4,7 +4,6 @@ import numpy as np
 from numpy.polynomial import polynomial as P
 import random
 
-
 def fastpow(x, deg):
     """ Быстрое возведение в степень для натуральных чисел
     https://en.wikipedia.org/wiki/Exponentiation_by_squaring
