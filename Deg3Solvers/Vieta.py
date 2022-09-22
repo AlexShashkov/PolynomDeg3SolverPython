@@ -8,6 +8,10 @@ np.seterr(all='raise')
 
 
 class Solver(object):
+    """
+    Реализация Тригонометрической формулы Виеты
+    http://poivs.tsput.ru/ru/Math/Functions/Polynomials/VietaTrigonometricFormula
+    """
     def __init__(self):
         self.pidiv3 = np.pi/3
         self.sqrt3 = np.sqrt(3)

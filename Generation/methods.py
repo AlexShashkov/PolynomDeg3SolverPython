@@ -4,30 +4,6 @@ import numpy as np
 from numpy.polynomial import polynomial as P
 import random
 
-def fastpow(x, deg):
-    """ Быстрое возведение в степень для натуральных чисел
-    https://en.wikipedia.org/wiki/Exponentiation_by_squaring
-    Numpy решает все-равно быстрее
-    @type x: int
-    @param x: Число, которое необходимо возвести в степень.
-    @type def: int
-    @param deg: Непосредственно необходимая степень числа.
-    @rtype: int
-    @returns: Число x в степени deg
-    """
-    if x == 1 or x == 0:
-        return x
-    if deg == 0:
-        return 1
-    if deg < 0:
-        return 1 / power(x, -deg)
-    ans = 1
-    while deg:
-        if deg & 1:
-            ans *= x
-        deg >>= 1
-        x *= x
-    return ans
 
 def generateEquationsFromReady(array:"Array") -> list:
     """ Сгенерировать коэффициенты полиномов по корням
@@ -46,12 +22,11 @@ def generateComplexEquations(count=10) -> list:
     @rtype: list
     @returns: Трехмерный список из коэффицентов и корней
     """
-    # arr = np.random.randint(frm, to, (count, 3)).astype("float")
     arr = np.random.rand(count, 3) + np.random.rand(count, 3) * 1j
 
     return generateEquationsFromReady(arr)
 
-def generateIntegerEquations(count=10, max=1, min=0) -> list:
+def generateIntegerEquations(count=10, max=9, min=0, coeff=1) -> list:
     """ Сгенерировать коэффициенты полиномов и комплексные корни
     @type count: int
     @param count: Количество полиномов
@@ -64,6 +39,9 @@ def generateIntegerEquations(count=10, max=1, min=0) -> list:
     """
     arr = np.random.randint(min, max, (count, 3)) + \
         np.random.randint(min, max, (count, 3))*1j
+    # print("init arr", arr)
+    arr *= coeff
+    # print("init with small delimeter", arr)
     return generateEquationsFromReady(arr)
 
 def generateExponentComplexEquations(count=10, max=1, min=0) -> list:
