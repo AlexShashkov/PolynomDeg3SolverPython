@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import json
 from MethodsArray import Array, profile
 from Generation.plotResults import *
 from Generation.methods import *
@@ -26,6 +27,7 @@ def StartEquationsTest(params, **kwargs) -> None:
     atol = None
     saveInput = False
     saveResults = False
+    savePlot = True
 
     if params is None:
         while True:
@@ -46,16 +48,20 @@ def StartEquationsTest(params, **kwargs) -> None:
         atol=params.atol
         saveInput=params.saveinput
         saveResults=params.saveresult
+        savePlot=params.plot
     data = generator(inp)
     coeffs = Array(data[0])
     answers = Array(data[1])
-    # print("Сгенерированные полиномы:\n", coeffs)
-    # print("Сгенерированные ответы:\n", answers)
+    if saveInput:
+        np.savetxt(f"test-input-{start}.txt", coeffs())
+        np.savetxt(f"test-original-{start}.txt", answers())
     res = {}
 
     for name, solver in kwargs.items():
         print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
         elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
+        if saveResults:
+            np.savetxt(f"test-result-{name}-{start}.txt", _res)
         print(f"Решено за {elapsed} тактов.")
         test_result = {
             "time":elapsed,
@@ -66,7 +72,14 @@ def StartEquationsTest(params, **kwargs) -> None:
         res[name] = test_result
 
     print(res)
-    if param is None:
+
+    if savePlot:
+        plt = plotTest(start,
+           f"Тестирование {inp} полиномов. atol - {atol}, rtol - {rtol}.",
+           res
+        )
+        plt.savefig(f"test-{rtol}-{atol}-{start}.png")
+    if params is None:
         _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
 
 def StartEquationsMinValueTest(params, **kwargs) -> None:
@@ -123,11 +136,11 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
     for i in np.arange(minVal, maxVal, step)[::-1]:
         print(f"Разряд {i}")
 
-        data = generator(inp, 10, 0)
-        coeffs = Array(data[0]*i)
-        answers = Array(data[1]*i)
-        # print("Сгенерированные полиномы:\n", coeffs)
-        # print("Сгенерированные ответы:\n", answers)
+        data = generator(inp, coeff=i)
+        coeffs = Array(data[0])
+        answers = Array(data[1])
+        print("Сгенерированные полиномы:\n", coeffs)
+        print("Сгенерированные ответы:\n", answers)
         if saveInput:
             np.savetxt(f"input-{i}-{start}.txt", coeffs())
             np.savetxt(f"original-{i}-{start}.txt", answers())
@@ -136,7 +149,7 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
         for name, solver in kwargs.items():
             print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
             elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
-            print("Результат:", _res)
+            # print("Результат:", _res)
             if saveResults:
                 np.savetxt(f"result-{name}-{i}-{start}.txt", _res)
             results = dict(zip(unique, count))
@@ -149,15 +162,16 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
                 "result":results,
             }
             res[name].append(test_result)
-        # print(res)
     if savePlot:
-        plt = plotTest(start, f"Проверка минимальных значений от {minVal} до {maxVal}", res)
+        plt = plotTest(start,
+           f"Проверка минимальных комплексных значений от {minVal} до {maxVal}. \natol - {atol}, rtol - {rtol}. Шаг - {step}",
+           res
+        )
         plt.savefig(f"many-{rtol}-{step}-{start}.png")
     if params is None:
         _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
 
 def StartEquationsMinExpValueTest(params, **kwargs) -> None:
-    # TODO: другая метрика для очень маленьких значений?
     generator = generateExponentComplexEquations
     start = str(time.time())
     inp = None

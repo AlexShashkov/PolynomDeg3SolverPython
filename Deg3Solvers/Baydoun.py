@@ -7,6 +7,11 @@ import os
 np.seterr(all='raise')
 
 class Solver(object):
+    """
+    Реализация 'Analytical formula for the roots of the general complex cubic polynomial'
+    Автор: Ibrahim Baydoun
+    Статья: https://arxiv.org/abs/1512.07585
+    """
     def __init__(self):
         self.onethree = 1/3
         self.onenine = self.onethree * self.onethree
