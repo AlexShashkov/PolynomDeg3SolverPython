@@ -28,7 +28,7 @@ def plotTest(time, title, data):
     # with Image.open('testresults.png') as img:
         # img.show()
 
-def plotTest(time, title, data):
+def pieTest(time, title, data):
     """
     График для одного теста
     """
