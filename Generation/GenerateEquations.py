@@ -74,7 +74,7 @@ def StartEquationsTest(params, **kwargs) -> None:
     print(res)
 
     if savePlot:
-        plt = plotTest(start,
+        plt = pieTest(start,
            f"Тестирование {inp} полиномов. atol - {atol}, rtol - {rtol}.",
            res
         )

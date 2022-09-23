@@ -1,8 +1,9 @@
+import matplotlib.pyplot as plt
 import time
 import numpy as np
 from MethodsArray import profile
 
-arr = np.random.randint(10, 20, (10, 1))
+arr = np.random.randint(10, 20, (100, 1))
 arr = np.longlong(arr)
 print("generated array", arr)
 def fpowtest(arr):
@@ -30,6 +31,10 @@ def nproottest(arr):
     return np.power(arr, 10)
 
 def fastbinpow(base):
+    """
+    Fast Power Algorithm - Exponentiation by Squaring
+    https://www.rookieslab.com/posts/fast-power-algorithm-exponentiation-by-squaring-cpp-python-implementation
+    """
     power = 10
     result = 1
     while power > 0:
@@ -46,6 +51,10 @@ def fastbinpow(base):
     return result
 
 def BinaryPower(x, y=10):
+    """
+    Binary Exponentiation
+    https://cp-algorithms.com/algebra/binary-exp.html#implementation
+    """
     if y == 0:
         return 1
     tmp = np.power(x, y*0.5)
@@ -54,36 +63,28 @@ def BinaryPower(x, y=10):
     else:
         return tmp * tmp * x
 
+funcs = {
+    "Exponentiation by squaring":{"eval": fastpow, "x":[], "y":[]},
+    "Numpy power": {"eval": nproottest, "x":[], "y":[]},
+    "Fast binary exponentiation": {"eval": fastbinpow, "x":[], "y":[]},
+    "Binary exponentiation": {"eval": BinaryPower, "x":[], "y":[]}
+}
 
-print("Тестируем скорость быстрого возведения в степень")
-t = time.process_time_ns()
-# result = fpowtest(arr)
-result = np.apply_along_axis(fastpow, 1, np.copy(arr))
-elapsed = time.process_time_ns() - t
-print(result)
-print(f"Решено за {elapsed} наносекунд.")
+for i in range(2, 20):
+    for name, func in funcs.items():
+        t = time.process_time_ns()
+        result = np.apply_along_axis(func["eval"], 1, np.copy(arr))
+        print(name, result)
+        elapsed = time.process_time_ns() - t
+        func["x"].append(i)
+        func["y"].append(elapsed)
 
-print("Тестируем скорость binary exponetiation")
-t = time.process_time_ns()
-# result = fpowtest(arr)
-result = np.apply_along_axis(fastbinpow, 1, np.copy(arr))
-elapsed = time.process_time_ns() - t
-print(result)
-print(f"Решено за {elapsed} наносекунд.")
-
-print("Тестируем скорость бинарного возведения в степень")
-t = time.process_time_ns()
-# result = fpowtest(arr)
-result = np.apply_along_axis(BinaryPower, 1, np.copy(arr))
-elapsed = time.process_time_ns() - t
-print(result)
-print(f"Решено за {elapsed} наносекунд.")
-
-print("Тестируем скорость np.power")
-t = time.process_time_ns()
-result = np.apply_along_axis(nproottest, 1, np.copy(arr))
-elapsed = time.process_time_ns() - t
-print(result)
-print(f"Решено за {elapsed} наносекунд.")
+print(funcs)
 
 
+for name, func in funcs.items():
+    plt.plot(func["x"], func["y"], label=name)
+plt.legend()
+plt.ylabel("Наносекунды")
+plt.xlabel("Степень")
+plt.savefig(f"fastpow-test.png")
