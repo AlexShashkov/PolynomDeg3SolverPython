@@ -72,7 +72,6 @@ class Solver(object):
         @returns: Объект типа Array с решениями уравнения.
         """
         inp2three = inp[2]*self.onethree
-
         phi = np.arccos(R/np.sqrt(Q[1]))*self.onethree
         #print("Usual method")
         #print(f"Phi: {phi} ")
@@ -161,20 +160,23 @@ class Solver(object):
         """
         #print(f"Input: {inp}")
         Q = npow(inp[2], 2)*self.onenine - inp[1]*self.onethree
-        R = npow(inp[2], 3)*self.one27-inp[1]*inp[2]*self.onesix+inp[0]*self.onetwo
-        Q3 = npow(Q, 3)
-        R2 = npow(R, 2)
-        S = Q3 - R2
         #print(f"Q: {Q}, R: {R}, S: {S}")
         x1, x2, x3 = 0, 0, 0
-        if S == 0:
-            x1, x2, x3 = self._Degenerate(Q, R, S, inp)
-        elif S > 0:
-            x1, x2, x3 = self._Usual([Q, Q3], R, S, inp)
+        if Q == 0:
+            # Случай (x-a)^3
+            x1, x2, x3 = [-inp[2]/3]*3
         else:
-            x1, x2, x3 = self._Complex([Q, Q3], R, S, inp)
-        #print(f"Preresult: {x1}, {x2}, {x3} ")
-        arr = [x1, x2, x3]
-        return np.longcomplex(arr).reshape((3, ))
+            R = npow(inp[2], 3)*self.one27-inp[1]*inp[2]*self.onesix+inp[0]*self.onetwo
+            R2 = npow(R, 2)
+            Q3 = npow(Q, 3)
+            S = Q3 - R2
+            if S == 0:
+                x1, x2, x3 = self._Degenerate(Q, R, S, inp)
+            elif S > 0:
+                x1, x2, x3 = self._Usual([Q, Q3], R, S, inp)
+            else:
+                x1, x2, x3 = self._Complex([Q, Q3], R, S, inp)
+            arr = [x1, x2, x3]
+            return np.longcomplex(arr).reshape((3, ))
 
 Solver__doc__ = "Решает уравнения третьей степени методом Виета. На вход принимает многомерный массив, длина строки - 4. Возвращает матрицу с решениями для каждой строки."
