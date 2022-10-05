@@ -14,9 +14,6 @@ class Solver(object):
     """
     def __init__(self):
         self.onethree = 1/3
-        self.onenine = self.onethree * self.onethree
-        self.one27 = self.onenine * self.onethree
-
         self.twothree = self.onethree*2
         self.sqrt3 = np.sqrt(3)
         self.cbrt4 = np.cbrt(4)
@@ -51,14 +48,8 @@ class Solver(object):
         if row[3] != lc(0):
             divThrid = 1/row[3]
             newCol *= divThrid
-        a = newCol[3]
-        b = newCol[2]
-        c = newCol[1]
-        d = newCol[0]
-
-        b_arr = [b]
-        c_arr = [c]
-        d_arr = [d]
+        a, b, c, d = newCol[3], newCol[2], newCol[1], newCol[0]
+        b_arr, c_arr, d_arr = [b], [c], [d]
         for i in range(5):
             b_arr.append(b_arr[i]*b_arr[0])
         for i in range(3):
@@ -105,7 +96,7 @@ class Solver(object):
         sqrt3 = lc(self.cbrt4)
 
         sqrt2div3 = sqrt2*self.onethree
-        sqrt2div9 = sqrt2*self.onenine
+        sqrt2div9 = sqrt2*self.onethree*self.onethree
         sqrt3ftwo = sqrt3*0.5
 
         bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 2*(2*b[0]*c0d0 - c[2]) + d[1]) + (sqrt2div9)*t
@@ -131,9 +122,9 @@ class Solver(object):
             R2 = npow(Rbase - r, self.onethree)
 
 
-
-        M = [-1, 0.5 - sqrt2*0.5, 0.5 + sqrt2*0.5]
-        M2 = [1, -0.5 - sqrt2*0.5, -0.5 + sqrt2*0.5]
+        sqrt205=sqrt2*0.5
+        M = [-1, 0.5 - sqrt205, 0.5 + sqrt205]
+        M2 = [1, -0.5 - sqrt205, -0.5 + sqrt205]
 
         arg1_1 = A1*bl1
         arg1_2 = -d0*R1
@@ -144,7 +135,6 @@ class Solver(object):
         phi1 = np.angle(arg1_1) - np.angle(arg1_2)
         phi2 = np.angle(arg2_1) - np.angle(arg2_2)
 
-
         a1 = (sqrt3ftwo)*(np.cos(phi1)+1j*np.sin(phi1))
         a2 = (sqrt3ftwo)*(np.cos(phi2)+1j*np.sin(phi2))
 
@@ -153,12 +143,6 @@ class Solver(object):
         x1 = M[0]*a1R1 + M2[0]*a2R2 - self.bthree
         x2 = M[1]*a1R1 + M2[1]*a2R2 - self.bthree
         x3 = M[2]*a1R1 + M2[2]*a2R2 - self.bthree
-
-        if o>=0:
-        # зануляем мнимую часть корней(тк все корни у нас 100% действительные)
-            x1 = x1.real + 0j
-            x2 = x2.real + 0j
-            x3 = x3.real + 0j
         return [x1, x2, x3]
 
 
@@ -183,7 +167,7 @@ class Solver(object):
 
         self.bthree = b[0]*self.onethree
         o = -4*(b[2]*d[0] + c[2]) + b[1]*c[1] + 9*(2*b[0]*c[0]*d[0] - 3*d[1])
-        r = (2*b[2] + 9*(-b[0]*c[0] + 3*d[0]))*self.one27
+        r = (2*b[2] + 9*(-b[0]*c[0] + 3*d[0]))/27
         arr = None
         if o == 0 and r == 0:
             # Стандартные действительные корни
