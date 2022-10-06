@@ -57,16 +57,26 @@ def StartEquationsTest(params, **kwargs) -> None:
 
     for name, solver in kwargs.items():
         print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
-        elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
-        if saveResults:
-            np.savetxt(f"test-result-{name}-{start}.txt", _res)
-        print(f"Решено за {elapsed} наносекунд.")
-        test_result = {
-            "time":elapsed,
-            "res":len(unique),
-            "unique":unique,
-            "count":count
-        }
+        test_result = None
+        try:
+            elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
+            if saveResults:
+                np.savetxt(f"test-result-{name}-{start}.txt", _res)
+            print(f"Решено за {elapsed} наносекунд.")
+            test_result = {
+                "time":elapsed,
+                "res":len(unique),
+                "unique":unique,
+                "count":count
+            }
+        except Exception as ex:
+            test_result = {
+                "time":0,
+                "res":0,
+                "unique":0,
+                "count":0
+            }
+            print("Что-то пошло не так.", ex)
         res[name] = test_result
 
     print(res)
@@ -138,19 +148,33 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
 
         for name, solver in kwargs.items():
             print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
-            elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
-            # print("Результат:", _res)
-            if saveResults:
-                np.savetxt(f"result-{name}-{i}-{start}.txt", _res)
-            results = dict(zip(unique, count))
-            if False not in results.keys(): results[False]=0
-            if True not in results.keys(): results[True]=0
-            # print(results)
-            test_result = {
-                "step":i,
-                "time":elapsed,
-                "result":results,
-            }
+            test_result = None
+            try:
+                elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
+                print(f"Решено за {elapsed} наносекунд.")
+                # print("Результат:", _res)
+                if saveResults:
+                    np.savetxt(f"result-{name}-{i}-{start}.txt", _res)
+                results = dict(zip(unique, count))
+                if False not in results.keys(): results[False]=0
+                if True not in results.keys(): results[True]=0
+                # print(results)
+                test_result = {
+                    "step":i,
+                    "time":elapsed,
+                    "result":results,
+                }
+            except Exception as ex:
+                print("Что-то пошло не так.", ex)
+                test_result = {
+                    "step":i,
+                    "time":0,
+                    "result":{
+                        True: 0,
+                        False: inp*3
+                    },
+                }
+
             res[name].append(test_result)
     if savePlot:
         plt = plotTest(start,

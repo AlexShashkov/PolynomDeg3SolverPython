@@ -29,23 +29,18 @@ tests = {
     "ComplexSmall": StartEquationsMinValueTest
 }
 
-parser = argparse.ArgumentParser(description="App for solving and testing \
-    Vieta/Baydoun methods ")
-parser.add_argument("-m", "--method", help="Launches Vieta OR Baydoun method",
-    default=None)
-parser.add_argument("-t", "--test", \
-    help="Run test:1 for random complex numbers, 2 for small random \
-    complex numbers", default=None)
-parser.add_argument("-si", "--saveinput", help="Saves initial input",
-    action="store_true")
-parser.add_argument("-c", "--count", help="Count of generated polynoms", default=100, type=int)
-parser.add_argument("-s", "--saveresult", help="Saves results", action="store_true")
-parser.add_argument("-p", "--plot", help="Plot test results", action="store_true")
-parser.add_argument("-a", "--atol", help="absolute tolerance", default=1e-08, type=float)
-parser.add_argument("-r", "--rtol", help="relative tolerance", default=1e-05, type=float)
-parser.add_argument("-mx", "--max", help="Maximal number for small numbers", default=0.1, type=float)
-parser.add_argument("-mn", "--min", help="Minimal value for small numbers", default=0.001, type=float)
-parser.add_argument("-st", "--step", help="Step for test", default=0.005, type=float)
+parser = argparse.ArgumentParser(description="Демо для работы с методом Vieta и Baydoun")
+parser.add_argument("-m", "--method", help="Запустить метод Vieta или Baydoun", default=None)
+parser.add_argument("-t", "--test", help="Вид тестирования. Complex - сгенерировать корни. ComplexSmall - сгенерировать корни с шагом", default=None)
+parser.add_argument("-si", "--saveinput", help="Нужно ли сохранить входные данные",action="store_true")
+parser.add_argument("-c", "--count", help="Количество сгенерированных полиномов", default=100, type=int)
+parser.add_argument("-s", "--saveresult", help="Нужно ли сохранить результаты", action="store_true")
+parser.add_argument("-p", "--plot", help="Нужен ли график результатов", action="store_true")
+parser.add_argument("-a", "--atol", help="Абсолютная погрешность", default=1e-08, type=float)
+parser.add_argument("-r", "--rtol", help="Относительная погрещность", default=1e-05, type=float)
+parser.add_argument("-mx", "--max", help="Максимальный множитель в тесте с малыми корнями", default=0.1, type=float)
+parser.add_argument("-mn", "--min", help="Минимальный множитель в тесте с малыми корнями", default=0.001, type=float)
+parser.add_argument("-st", "--step", help="Шаг для малых корней", default=0.005, type=float)
 
 args = parser.parse_args()
 print(args)
