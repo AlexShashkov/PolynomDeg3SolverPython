@@ -1,7 +1,6 @@
 import time
 import numpy as np
 import json
-from MethodsArray import Array, profile
 from Generation.plotResults import *
 from Generation.methods import *
 
@@ -9,8 +8,8 @@ def test(solver, coeffs, answers, rtol, atol) -> list:
     t = time.process_time_ns()
     result = solver(coeffs)
     elapsed = time.process_time_ns() - t
-    _result = np.sort(result())
-    _answers = np.sort(answers())
+    _result = np.sort(result)
+    _answers = np.sort(answers)
     # print("Получено:", _result)
     # print("Ожидалось:", _answers)
     _res = np.isclose(_result, _answers, rtol=rtol, atol=atol)
@@ -35,9 +34,9 @@ def StartEquationsTest(params, **kwargs) -> None:
                 inp = input("Введите количество полиномов, которые будут сгенерированы. >")
                 inp = int(inp)
                 rtol = input("Введите относительную погршеность. >")
-                rtol = int(inp)
-                rtol = input("Введите абсолютную погршеность. >")
-                atol = int(inp)
+                rtol = float(rtol)
+                atol = input("Введите абсолютную погршеность. >")
+                atol = float(atol)
             except Exception as ex:
                 print("Ошибка. Попробуйте еще раз:", ex)
                 continue
@@ -50,11 +49,10 @@ def StartEquationsTest(params, **kwargs) -> None:
         saveResults=params.saveresult
         savePlot=params.plot
     data = generator(inp)
-    coeffs = Array(data[0])
-    answers = Array(data[1])
+    coeffs, answers = data[0], data[1]
     if saveInput:
-        np.savetxt(f"test-input-{start}.txt", coeffs())
-        np.savetxt(f"test-original-{start}.txt", answers())
+        np.savetxt(f"test-input-{start}.txt", coeffs)
+        np.savetxt(f"test-original-{start}.txt", answers)
     res = {}
 
     for name, solver in kwargs.items():
@@ -62,7 +60,7 @@ def StartEquationsTest(params, **kwargs) -> None:
         elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
         if saveResults:
             np.savetxt(f"test-result-{name}-{start}.txt", _res)
-        print(f"Решено за {elapsed} тактов.")
+        print(f"Решено за {elapsed} наносекунд.")
         test_result = {
             "time":elapsed,
             "res":len(unique),
@@ -86,32 +84,25 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
     generator = generateIntegerEquations
     start = str(time.time())
 
-    inp = None
-    rtol = None
-    atol = None
-    saveInput = False
-    saveResults = False
-    savePlot = True
-    maxVal = None
-    minVal = None
-    step   = None
+    inp, rtol, atol = None, None, None
+    saveInput, saveResults, savePlot = False, False, True
+    maxVal, minVal, step = None, None, None
     if params is None:
         while True:
             try:
                 inp = input("Введите количество полиномов, которые будут сгенерированы. >")
                 inp = int(inp)
                 rtol = input("Введите относительную погршеность. >")
-                rtol = int(rtol)
+                rtol = float(rtol)
                 atol = input("Введите абсолютную погршеность. >")
-                atol = int(atol)
+                atol = float(atol)
                 maxVal = input("Введите максимальный разряд. >")
                 maxVal = float(maxVal)
                 minVal = input("Введите минимальный разряд. >")
                 minVal = float(minVal)
                 step = input("Введите шаг. >")
                 step = float(step)
-                if minVal > maxVal: raise("Минимальное значение не может быть больше \
-                        максимального!")
+                if minVal > maxVal: raise Exception("Минимальное значение не может быть больше максимального!")
             except Exception as ex:
                 print("Ошибка. Попробуйте еще раз:", ex)
                 continue
@@ -137,13 +128,12 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
         print(f"Разряд {i}")
 
         data = generator(inp, coeff=i)
-        coeffs = Array(data[0])
-        answers = Array(data[1])
+        coeffs, answers = data[0], data[1]
         print("Сгенерированные полиномы:\n", coeffs)
         print("Сгенерированные ответы:\n", answers)
         if saveInput:
-            np.savetxt(f"input-{i}-{start}.txt", coeffs())
-            np.savetxt(f"original-{i}-{start}.txt", answers())
+            np.savetxt(f"input-{i}-{start}.txt", coeffs)
+            np.savetxt(f"original-{i}-{start}.txt", answers)
 
 
         for name, solver in kwargs.items():
@@ -170,62 +160,3 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
         plt.savefig(f"many-{rtol}-{step}-{start}.png")
     if params is None:
         _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
-
-def StartEquationsMinExpValueTest(params, **kwargs) -> None:
-    generator = generateExponentComplexEquations
-    start = str(time.time())
-    inp = None
-    rtol = None
-    maxVal = None
-    minVal = None
-    while True:
-        try:
-            inp = input("Введите количество полиномов, которые будут сгенерированы. >")
-            inp = int(inp)
-            rtol = input("Введите допустимую погршеность. >")
-            rtol = int(inp)
-            maxVal = input("Введите максимально возможную степень экспоненты. >")
-            maxVal = int(maxVal)
-            minVal = input("Введите минимально возможную степень экспоненты. >")
-            minVal = int(minVal)
-            if minVal > maxVal: raise("Минимальное значение не может быть больше \
-                    максимального!")
-        except Exception as ex:
-            print("Ошибка. Попробуйте еще раз:", ex)
-            continue
-        break
-
-    res = {}
-    for name, _ in kwargs.items():
-        res[name] = []
-
-    print(f"Начинаю тестирование экспонент от {maxVal} до {minVal}")
-    for i in range(maxVal, minVal, -1):
-        print(f"Минимальная проверка значений экспоненты {i}")
-
-        data = generator(inp, i, i-1)
-        coeffs = Array(data[0])
-        answers = Array(data[1])
-        # print("Сгенерированные полиномы:\n", coeffs)
-        # print("Сгенерированные ответы:\n", answers)
-
-
-        for name, solver in kwargs.items():
-            print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
-            elapsed, unique, count = test(solver, coeffs, answers, rtol)
-            # print(f"Решено за {elapsed} тактов.")
-            print(unique.shape)
-            results = dict(zip(unique, count))
-            if False not in results.keys(): results[False]=0
-            if True not in results.keys(): results[True]=0
-            # print(results)
-            test_result = {
-                "step":i,
-                "time":elapsed,
-                "result":results,
-            }
-            res[name].append(test_result)
-        # print(res)
-    plt = plotTest(start, f"Проверка минимальных значений, exp в степени [{maxVal},{minVal}].", res)
-    plt.savefig(f"many-{rtol}-{step}-{start}.png")
-    _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")

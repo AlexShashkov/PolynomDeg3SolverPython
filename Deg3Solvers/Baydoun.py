@@ -1,5 +1,4 @@
 from functools import singledispatch, update_wrapper
-from MethodsArray import Array, profile
 import numpy as np
 from numpy import longcomplex as lc, power as npow
 import os
@@ -8,7 +7,7 @@ np.seterr(all='raise')
 
 class Solver(object):
     """
-    Реализация 'Analytical formula for the roots of the general complex cubic polynomial'
+    Имплементация 'Analytical formula for the roots of the general complex cubic polynomial'
     Автор: Ibrahim Baydoun
     Статья: https://arxiv.org/abs/1512.07585
     """
@@ -18,29 +17,27 @@ class Solver(object):
         self.sqrt3 = np.sqrt(3)
         self.cbrt4 = np.cbrt(4)
 
-    def __call__(self, array:"Array") -> "Array":
+    def __call__(self, array:"ndarray") -> "ndarray":
         """Функтор для решения уравнений методом Baydoun.
-        @type array: Array
-        @param array: Входной массив данных. Может быть обычным массивом, массивом NumPy
-            или модифицированным Array.
-        @rtype: Array
-        @returns: Объект типа Array с решениями уравнения.
+        @type array: ndarray
+        @param array: Входной массив данных.
+        @rtype: ndarray
+        @returns: Объект типа ndarray с решениями уравнения.
         """
-        self.array = Array(array)
+        self.array = array #Array(array)
 
         if self.array.shape[1] != 4:
             raise Exception("Wrong dimension. Baydoun method works only with shapes of (N, 4)!")
 
-        newArray = np.apply_along_axis(self._checkA, 1, self.array.values)
+        newArray = np.apply_along_axis(self._checkA, 1, self.array) #.values)
         newArray = np.apply_along_axis(self._solve, 1, newArray)
-        return Array(newArray)
+        return newArray #Array(newArray)
 
-    # @profile(strip_dirs=True)
-    def _checkA(self, row):
+    def _checkA(self, row) -> "ndarray":
         """Модификация строки входных данных. Вычисление вспомогательных степеней.
-        @type row: Array
+        @type row: ndarray
         @param row: Строка входных данных.
-        @rtype: Array
+        @rtype: ndarray
         @returns: Измененная строка с вычисленными степенями.
         """
         newCol = row.copy()
@@ -59,24 +56,19 @@ class Solver(object):
         # print("b", b_arr, "\nc", c_arr, "\nd", d_arr, "\na", a)
         return np.array([d_arr, c_arr, b_arr, a], dtype=object)
 
-    # @profile(strip_dirs=True)
-    def _part2(self, row, o, r):
+    def _part2(self, row, o, r) -> "ndarray":
         """ Вычисление корней для случая, когда o != r.
-
-        @type row: Array
+        @type row: ndarray
         @param row: Входная строка.
         @type o: number
         @param o: Полученный параметр o.
         @type r: number
         @param r: Полученный параметр r.
-        @rtype: Array
+        @rtype: ndarray
         @returns: Решения уравнения.
         """
 
-        a = row[3]
-        b = row[2]
-        c = row[1]
-        d = row[0]
+        a, b, c, d = row[3], row[2], row[1], row[0]
         c0d0 = c[0]*d[0]
         b0c0 = b[0]*c[0]
         b0c1 = b[0]*c[1]
@@ -146,25 +138,20 @@ class Solver(object):
         return [x1, x2, x3]
 
 
-    def _solve(self, row):
+    def _solve(self, row) -> "ndarray":
         """
         Соответственно вычисление корней. Вычисляются переменные o и r по заданным формулам, после чего определяется тип корней уравнения:
         * o = r = 0 - действительные корни. Кратность хотя бы одного корня > 1.
         *
         * o > 0 - Все корни действительные, кратность каждого 1.
         * o < 0 - один действительный и два комплексных корня.
-        @type row: Array
+        @type row: ndarray
         @param row: Входная строка.
-        @rtype: Array
+        @rtype: ndarray
         @returns: Решения уравнения.
         """
 
-        a = row[3]
-        b = row[2]
-        c = row[1]
-        d = row[0]
-
-
+        a, b, c, d = row[3], row[2], row[1], row[0]
         self.bthree = b[0]*self.onethree
         o = -4*(b[2]*d[0] + c[2]) + b[1]*c[1] + 9*(2*b[0]*c[0]*d[0] - 3*d[1])
         r = (2*b[2] + 9*(-b[0]*c[0] + 3*d[0]))/27

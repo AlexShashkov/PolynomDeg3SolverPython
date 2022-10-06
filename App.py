@@ -1,7 +1,6 @@
 import argparse
 from Deg3Solvers.Baydoun import Solver as BSolver
 from Deg3Solvers.Vieta import Solver as VSolver
-from MethodsArray import Array
 from Generation.GenerateEquations import *
 
 from consolemenu import *
@@ -11,7 +10,8 @@ def inp(method):
     print("Введите через пробел коэффициенты при c, x, x^2, x^3\n")
     got = input("> ")
     try:
-        arr = Array(got.split())
+        arr = np.fromstring(got, dtype=complex, sep=' ').reshape([1, 4])
+        print(arr, arr.shape)
         arr = methods[method](arr)
         print("Ответ: ", arr)
         input()
@@ -58,17 +58,13 @@ if args.method is None and args.test is None:
             StartEquationsTest, args=[None], kwargs=methods)
     Testing_item3 = FunctionItem("Тестирование с малыми комплексными корнями",
             StartEquationsMinValueTest, args=[None], kwargs=methods)
-    Testing_item4 = FunctionItem("Тестирование с малыми комплексными корнями (Exp)",
-             StartEquationsMinExpValueTest, args=[None], kwargs=methods)
     menu.append_item(Vieta_item)
     menu.append_item(Baydoun_item)
     menu.append_item(Testing_item2)
     menu.append_item(Testing_item3)
-    # menu.append_item(Testing_item4)
     menu .show()
 elif args.method in methods.keys():
     inp(args.method)
 tst = tests.get(args.test, None)
 if tst is not None:
     tst(args, **methods)
-
