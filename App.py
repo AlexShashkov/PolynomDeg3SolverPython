@@ -16,7 +16,7 @@ def inp(method):
         print("Ответ: ", arr)
         input()
     except Exception as ex:
-        print(f"Коэффициенты введены неверно. {ex}")
+        print(f"Ошибка. {ex}")
         input()
 
 methods = {
@@ -29,7 +29,7 @@ tests = {
     "ComplexSmall": StartEquationsMinValueTest
 }
 
-parser = argparse.ArgumentParser(description="Демо для работы с методом Vieta и Baydoun")
+parser = argparse.ArgumentParser(description="Демо для работы с методом Vieta и Baydoun. Запуск без аргументов запустит программу с меню.")
 parser.add_argument("-m", "--method", help="Запустить метод Vieta или Baydoun", default=None)
 parser.add_argument("-t", "--test", help="Вид тестирования. Complex - сгенерировать корни. ComplexSmall - сгенерировать корни с шагом", default=None)
 parser.add_argument("-si", "--saveinput", help="Нужно ли сохранить входные данные",action="store_true")
@@ -43,9 +43,10 @@ parser.add_argument("-mn", "--min", help="Минимальный множите�
 parser.add_argument("-st", "--step", help="Шаг для малых корней", default=0.005, type=float)
 
 args = parser.parse_args()
-print(args)
+# print(args)
 
 if args.method is None and args.test is None:
+    # Если нет аргументов, то создаем меню
     menu = ConsoleMenu("PolynomDeg3Solver", "КМБО-03-20, 2022")
     Vieta_item = FunctionItem("Виета", inp, ["Vieta"])
     Baydoun_item = FunctionItem("Baydoun", inp, ["Baydoun"])

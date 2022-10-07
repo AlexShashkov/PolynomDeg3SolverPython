@@ -4,8 +4,6 @@ from numpy import longcomplex as lc
 from numpy import power as npow
 
 np.seterr(all='raise')
-
-
 class Solver(object):
     """
     Имплементация Тригонометрической формулы Виеты
@@ -42,7 +40,7 @@ class Solver(object):
         @returns: Измененная строка.
         """
         newCol = row.copy()
-        # В случае если число слишком маленькое, то из строки 9 будет вызвано исключение
+        # В случае если число слишком маленькое, то из строки 6 будет вызвано исключение
         if row[3] != 0:
             newCol /= row[3]
         return newCol
@@ -109,8 +107,8 @@ class Solver(object):
         return (x1, x2, x3)
 
     def _Degenerate(self, Q, R, S, inp) -> "ndarray":
-        """Решение уравнения с действительными корнями в случае S = 0
-
+        """Решение уравнения с действительными корнями в случае S = 0.
+        Вырожденные корни
         @type Q: number
         @param inp: Полученный параметр Q
         @type S: number
@@ -122,7 +120,6 @@ class Solver(object):
         @rtype: ndarray
         @returns: Объект типа ndarray с решениями уравнения.
         """
-        #print("Degenerate method")
         inp2three = inp[2]*self.onethree
         _x = np.cbrt(R.real)
         x1 = -2*_x-inp2three

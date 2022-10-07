@@ -24,7 +24,7 @@ class Solver(object):
         @rtype: ndarray
         @returns: Объект типа ndarray с решениями уравнения.
         """
-        self.array = array #Array(array)
+        self.array = array
 
         if self.array.shape[1] != 4:
             raise Exception("Wrong dimension. Baydoun method works only with shapes of (N, 4)!")
@@ -53,7 +53,6 @@ class Solver(object):
             c_arr.append(c_arr[i]*c_arr[0])
         for i in range(2):
             d_arr.append(d_arr[i]*d_arr[0])
-        # print("b", b_arr, "\nc", c_arr, "\nd", d_arr, "\na", a)
         return np.array([d_arr, c_arr, b_arr, a], dtype=object)
 
     def _part2(self, row, o, r) -> "ndarray":

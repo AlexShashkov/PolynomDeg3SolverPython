@@ -5,27 +5,38 @@ from Generation.plotResults import *
 from Generation.methods import *
 
 def test(solver, coeffs, answers, rtol, atol) -> list:
+    """
+    Запускает тестирование метода
+    @type solver: Solver
+    @param solver: Объект метода решения полиномов.
+    @rtype: list
+    @returns: Вернет лист со временем решения, видами ответов, количество
+    ответов, полученный результат и ожидаемый
+    """
     t = time.process_time_ns()
     result = solver(coeffs)
     elapsed = time.process_time_ns() - t
     _result = np.sort(result)
+    # для тестирования отсортируем корни, сравним
+    # каждый с каждым
     _answers = np.sort(answers)
-    # print("Получено:", _result)
-    # print("Ожидалось:", _answers)
     _res = np.isclose(_result, _answers, rtol=rtol, atol=atol)
-    # print(_result)
     unique, counts = np.unique(_res, return_counts=True)
 
     return (elapsed, unique, counts, _result, _answers)
-
 def StartEquationsTest(params, **kwargs) -> None:
+    """
+    Тестирование с обычными комплексными корнями
+    @type params: dir
+    @param params: Список аргументов, с которыми программа была запущена
+    @type **kwargs: kwargs
+    @param: именованный список с генератором корней и методами для
+    решения уравнений
+    """
     generator = generateComplexEquations
     start = str(time.time())
-    inp = None
-    rtol = None
-    atol = None
-    saveInput = False
-    saveResults = False
+    inp, rtol, atol = None, None, None
+    saveInput, saveResult = False, False
     savePlot = True
 
     if params is None:
@@ -48,9 +59,11 @@ def StartEquationsTest(params, **kwargs) -> None:
         saveInput=params.saveinput
         saveResults=params.saveresult
         savePlot=params.plot
+    # Генерируем коэффициенты полиномов и корни
     data = generator(inp)
     coeffs, answers = data[0], data[1]
     if saveInput:
+        # Сохраняем коэффициенты и корни в файл
         np.savetxt(f"test-input-{start}.txt", coeffs)
         np.savetxt(f"test-original-{start}.txt", answers)
     res = {}
@@ -61,13 +74,15 @@ def StartEquationsTest(params, **kwargs) -> None:
         try:
             elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
             if saveResults:
+                # Сохраняем полученный результат в файле
+                # test-result-{название метода}-{начало тестирования}.txt
                 np.savetxt(f"test-result-{name}-{start}.txt", _res)
             print(f"Решено за {elapsed} наносекунд.")
             test_result = {
-                "time":elapsed,
-                "res":len(unique),
-                "unique":unique,
-                "count":count
+                "time":elapsed,     # время исполнения
+                "res":len(unique),  # количество всех корней
+                "unique":unique,    # True или False
+                "count":count       # И количество правильных/неправильных
             }
         except Exception as ex:
             test_result = {
@@ -82,6 +97,7 @@ def StartEquationsTest(params, **kwargs) -> None:
     print(res)
 
     if savePlot:
+        # Рисуем и сохраняем график
         plt = pieTest(start,
            f"Тестирование {inp} полиномов. atol - {atol}, rtol - {rtol}.",
            res
@@ -91,6 +107,14 @@ def StartEquationsTest(params, **kwargs) -> None:
         _ = input("Готово. Нажмите любую кнопку чтобы вернуться в меню.")
 
 def StartEquationsMinValueTest(params, **kwargs) -> None:
+    """
+    Тестирование с генерацией убывающих корней
+    @type params: dir
+    @param params: Список аргументов, с которыми программа была запущена
+    @type **kwargs: kwargs
+    @param: именованный список с генератором корней и методами для
+    решения уравнений
+    """
     generator = generateIntegerEquations
     start = str(time.time())
 
@@ -135,6 +159,7 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
     print(f"Начинаю тестирование разрядов от {maxVal} до {minVal}, atol \
         {atol}, rtol {rtol}")
     for i in np.arange(minVal, maxVal, step)[::-1]:
+        # Для каждого шага корня от большего к меньшему
         print(f"Разряд {i}")
 
         data = generator(inp, coeff=i)
@@ -145,24 +170,23 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
             np.savetxt(f"input-{i}-{start}.txt", coeffs)
             np.savetxt(f"original-{i}-{start}.txt", answers)
 
-
         for name, solver in kwargs.items():
             print(f"Тестируется метод {name}, кол-во уравнений: {inp}")
             test_result = None
             try:
                 elapsed, unique, count, _res, _answ = test(solver, coeffs, answers, rtol, atol)
                 print(f"Решено за {elapsed} наносекунд.")
-                # print("Результат:", _res)
                 if saveResults:
+                    # Сохраняем полученный результат в файле
+                    # test-result-{название метода}-{начало тестирования}.txt
                     np.savetxt(f"result-{name}-{i}-{start}.txt", _res)
                 results = dict(zip(unique, count))
                 if False not in results.keys(): results[False]=0
                 if True not in results.keys(): results[True]=0
-                # print(results)
                 test_result = {
-                    "step":i,
-                    "time":elapsed,
-                    "result":results,
+                    "step":i,           # текущий шаг корня
+                    "time":elapsed,     # время исполнения
+                    "result":results,   # True или False
                 }
             except Exception as ex:
                 print("Что-то пошло не так.", ex)
@@ -177,6 +201,7 @@ def StartEquationsMinValueTest(params, **kwargs) -> None:
 
             res[name].append(test_result)
     if savePlot:
+        # Рисуем график
         plt = plotTest(start,
            f"Проверка минимальных комплексных значений от {minVal} до {maxVal}. \natol - {atol}, rtol - {rtol}. Шаг - {step}",
            res
