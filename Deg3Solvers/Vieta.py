@@ -10,7 +10,7 @@ class Solver(object):
     http://poivs.tsput.ru/ru/Math/Functions/Polynomials/VietaTrigonometricFormula
     """
     def __init__(self):
-        self.pidiv3 = np.pi/3
+        self.pi2div3 = 2*np.pi/3
         self.sqrt3 = np.sqrt(3)
         self.onethree = 1/3
     def __call__(self, array:"ndarray") -> "ndarray":
@@ -66,8 +66,8 @@ class Solver(object):
 
         sqrtQ = 2*np.sqrt(Q[0])
         x1 = -sqrtQ*np.cos(phi)-inp2three
-        x2 = -sqrtQ*np.cos(phi+2*self.pidiv3)-inp2three
-        x3 = -sqrtQ*np.cos(phi-2*self.pidiv3)-inp2three
+        x2 = -sqrtQ*np.cos(phi+self.pi2div3)-inp2three
+        x3 = -sqrtQ*np.cos(phi-self.pi2div3)-inp2three
         return (x1, x2, x3)
 
     def _Complex(self, Q, R, S, inp) -> "ndarray":
