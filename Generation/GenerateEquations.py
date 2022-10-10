@@ -36,7 +36,7 @@ def StartEquationsTest(params, **kwargs) -> None:
     generator = generateComplexEquations
     start = str(time.time())
     inp, rtol, atol = None, None, None
-    saveInput, saveResult = False, False
+    saveInput, saveResults = False, False
     savePlot = True
 
     if params is None:

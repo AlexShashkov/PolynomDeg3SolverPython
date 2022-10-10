@@ -25,6 +25,8 @@ class Solver(object):
         @returns: Объект типа ndarray с решениями уравнения.
         """
         self.array = array
+        if self.array.ndim == 1:
+            self.array = self.array.reshape((1, self.array.shape[0]))
 
         if self.array.shape[1] != 4:
             raise Exception("Wrong dimension. Baydoun method works only with shapes of (N, 4)!")

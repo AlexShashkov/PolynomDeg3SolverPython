@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import time
 import numpy as np
-from MethodsArray import profile
 
 arr = np.random.randint(10, 20, (100, 1))
 arr = np.longlong(arr)
