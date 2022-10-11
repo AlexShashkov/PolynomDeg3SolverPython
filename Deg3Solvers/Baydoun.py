@@ -13,6 +13,7 @@ class Solver(object):
     """
     def __init__(self):
         self.onethree = 1/3
+        self.one27 = self.onethree*self.onethree*self.onethree
         self.twothree = self.onethree*2
         self.sqrt3 = np.sqrt(3)
         self.cbrt4 = np.cbrt(4)
@@ -43,7 +44,8 @@ class Solver(object):
         @returns: Измененная строка с вычисленными степенями.
         """
         newCol = row.copy()
-        # В случае если число настолько маленькое и может вызвать переполнение, приведя к inf, то появится исключение из строки 9.
+        # В случае если число настолько маленькое и может вызвать переполнение,
+        # приведя к inf, то появится исключение из строки 6.
         if row[3] != lc(0):
             divThrid = 1/row[3]
             newCol *= divThrid
@@ -74,11 +76,11 @@ class Solver(object):
         b0c0 = b[0]*c[0]
         b0c1 = b[0]*c[1]
         b1c1 = b[1]*c[1]*4
-        t = 2*c[2] * (4*(2*b[5] + 9*d[1]) + 33*(4*b[2]*d[0]  + b[1]*c[1] - \
-            2*b[0]*c0d0) + c[2] ) + 12*b[3]*c[0] * (d[1] - 7*c[2]) - b[1] * \
-            c[1]*d[0]*(24*b[2]+291*d[0]) + d[2]*(3*(48*b0c0 - 9*d[0]) - 2*b[2])
-        d0 = 4*(b[3]*c[1] - b[2]*c0d0 - 3*c[0]*d[1]) + 14*(-b[1]*c[2] + \
-                2*b0c1*d[0]) + b[1]*d[1] + c[3]
+        t = c[2]*(16*b[5] + 72*d[1] + 264*b[2]*d[0]  + 66*b[1]*c[1] - \
+            132*b[0]*c0d0 + 2*c[2]) + b[3]*c[0]*(12*d[1] - 84*c[2]) - b[1] * \
+            c[1]*d[0]*(24*b[2]+291*d[0]) + d[2]*(144*b0c0 - 27*d[0] - 2*b[2])
+        d0 = 4*b[3]*c[1] - 4*b[2]*c0d0 - 12*c[0]*d[1] -14*b[1]*c[2] + \
+                28*b0c1*d[0] + b[1]*d[1] + c[3]
         sqrt1 = None
         if o > 0:
             sqrt1 = npow(o + 0j, 0.5)
@@ -91,13 +93,13 @@ class Solver(object):
         sqrt2div9 = sqrt2*self.onethree*self.onethree
         sqrt3ftwo = sqrt3*0.5
 
-        bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 2*(2*b[0]*c0d0 - c[2]) + d[1]) + (sqrt2div9)*t
+        bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 4*b[0]*c0d0 + 2*c[2] + d[1]) +sqrt2div9*t
         bl1 = npow(bl, self.onethree)
         bl2 = npow(bl1, 2)
-        A1 = 2*((-sqrt2div3)*(2*(2*b[2]*c[0] - d[0]*b[1]) - 13*b0c1 + 15*c0d0) + c[0]*sqrt1)
-        A2 = 8*(b[4]*c[1] - b[3]*c0d0 - 5*b[2]*c[2]) + 2*b[2]*d[1] +\
-            29*b1c1*d[0] + 23*b[0]*c[3] +3*(-7*c[2]*d[0] +\
-            3*(3*d[2] - 11*b0c0*d[1])) -sqrt1*sqrt2 * (2*(b1c1 - 5*b[0]*c0d0) + c[2] + 3*d[1])
+        A1 = (-sqrt2div3)*(8*b[2]*c[0] - 4*d[0]*b[1] - 26*b0c1 + 30*c0d0) + 2*c[0]*sqrt1
+        A2 = 8*b[4]*c[1] - 8*b[3]*c0d0 - 40*b[2]*c[2] + 2*b[2]*d[1] +\
+            29*b1c1*d[0] + 23*b[0]*c[3] -21*c[2]*d[0] +\
+            27*d[2] - 99*b0c0*d[1] -sqrt1*sqrt2 * (2*b1c1 - 10*b[0]*c0d0 + c[2] + 3*d[1])
         Rbase = sqrt1 * sqrt2div9
         R1 = None
         R2 = None
@@ -149,8 +151,8 @@ class Solver(object):
 
         a, b, c, d = row[::-1]
         self.bthree = b[0]*self.onethree
-        o = -4*(b[2]*d[0] + c[2]) + b[1]*c[1] + 9*(2*b[0]*c[0]*d[0] - 3*d[1])
-        r = (2*b[2] + 9*(-b[0]*c[0] + 3*d[0]))/27
+        o = -4*(b[2]*d[0] + c[2]) + b[1]*c[1] + 18*b[0]*c[0]*d[0] - 27*d[1]
+        r = 2*b[2]*self.one27 -9*b[0]*c[0]*self.one27 + d[0]
         arr = None
         if o == 0 and r == 0:
             # Стандартные действительные корни

@@ -145,7 +145,8 @@ class Solver(object):
             # Случай (x-a)^3
             x1, x2, x3 = [-inp[2]/3]*3
         else:
-            R = npow(inp[2], 3)*self.onethree*self.onethree*self.onethree-inp[1]*inp[2]/6+inp[0]/2
+            R = npow(inp[2],
+                     3)*self.onethree*self.onethree*self.onethree-inp[1]*inp[2]/6+inp[0]*0.5
             R2 = npow(R, 2)
             Q3 = npow(Q, 3)
             S = Q3 - R2
