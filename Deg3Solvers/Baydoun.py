@@ -1,4 +1,3 @@
-from functools import singledispatch, update_wrapper
 import numpy as np
 from numpy import longcomplex as lc, power as npow
 import os
@@ -45,11 +44,11 @@ class Solver(object):
         """
         newCol = row.copy()
         # В случае если число настолько маленькое и может вызвать переполнение,
-        # приведя к inf, то появится исключение из строки 6.
+        # приведя к inf, то появится исключение из строки 5.
         if row[3] != lc(0):
             divThrid = 1/row[3]
             newCol *= divThrid
-        a, b, c, d = newCol[3], newCol[2], newCol[1], newCol[0]
+        a, b, c, d = newCol[::-1]
         b_arr, c_arr, d_arr = [b], [c], [d]
         for i in range(5):
             b_arr.append(b_arr[i]*b_arr[0])
@@ -101,8 +100,7 @@ class Solver(object):
             29*b1c1*d[0] + 23*b[0]*c[3] -21*c[2]*d[0] +\
             27*d[2] - 99*b0c0*d[1] -sqrt1*sqrt2 * (2*b1c1 - 10*b[0]*c0d0 + c[2] + 3*d[1])
         Rbase = sqrt1 * sqrt2div9
-        R1 = None
-        R2 = None
+        R1, R2 = None, None
         if o == 0:
             if r > 0:
                 R1 = npow(Rbase + r, self.onethree)
@@ -141,7 +139,8 @@ class Solver(object):
 
     def _solve(self, row) -> "ndarray":
         """
-        Соответственно вычисление корней. Вычисляются переменные o и r по заданным формулам, после чего определяется тип корней уравнения:
+        Соответственно вычисление корней. Вычисляются переменные o и r по
+        заданным формулам, после чего определяется тип корней.
         * o = r = 0 - действительные корни. Кратность хотя бы одного корня > 1.
         @type row: ndarray
         @param row: Входная строка.

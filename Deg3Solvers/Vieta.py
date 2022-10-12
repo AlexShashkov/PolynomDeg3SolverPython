@@ -1,4 +1,3 @@
-from functools import singledispatch, update_wrapper
 import numpy as np
 from numpy import longcomplex as lc
 from numpy import power as npow
